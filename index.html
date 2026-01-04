@@ -1,88 +1,83 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Koperasi Agrotek</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrotek Perak</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-green-50 pb-10 font-sans">
-    <div class="bg-green-700 text-white p-10 rounded-b-[45px] text-center shadow-lg mb-6">
-        <h1 class="text-2xl font-black italic">KOPERASI AGROTEK PERAK</h1>
-        <p class="text-xs opacity-80 uppercase tracking-widest">Segar Dari Ladang</p>
+<body class="bg-green-50 pb-10">
+    <div class="bg-green-700 text-white p-8 rounded-b-[40px] text-center mb-6">
+        <h1 class="text-2xl font-black italic">AGROTEK PERAK</h1>
+        <p class="text-[10px] opacity-70">Log Pesanan Terkini di Bawah</p>
     </div>
 
     <div class="max-w-md mx-auto px-4 space-y-6">
         <div id="produkGrid" class="space-y-4"></div>
 
-        <div class="bg-white p-8 rounded-[35px] shadow-xl border border-green-100">
-            <h3 class="font-black text-green-800 mb-4 border-b pb-2 uppercase text-sm">Borang Pesanan</h3>
-            <form id="formOrder" class="space-y-4">
-                <input type="text" id="nama" placeholder="Nama Anda" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-green-500" required>
-                <input type="number" id="fon" placeholder="WhatsApp (601...)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-green-500" required>
-                <select id="barang" onchange="kira()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold" required></select>
-                <input type="number" id="berat" step="0.1" oninput="kira()" placeholder="Berat (kg)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold" required>
-                <div class="p-4 bg-green-600 rounded-2xl text-white flex justify-between items-center">
-                    <span class="font-bold">Total:</span>
-                    <span class="text-2xl font-black">RM <span id="total">0.00</span></span>
+        <div class="bg-white p-6 rounded-[30px] shadow-lg">
+            <h3 class="font-black text-green-800 border-b pb-2 mb-4 text-sm uppercase">Borang Pesanan Cepat</h3>
+            <form id="fOrder" class="space-y-3">
+                <input type="text" id="nama" placeholder="Nama Anda" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border" required>
+                <input type="number" id="fon" placeholder="WhatsApp (601...)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border" required>
+                <select id="barang" onchange="kira()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border font-bold" required></select>
+                <input type="number" id="berat" step="0.1" oninput="kira()" placeholder="Berat (kg)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border font-bold" required>
+                <div class="p-4 bg-green-700 rounded-2xl text-white flex justify-between font-black">
+                    <span>TOTAL:</span><span>RM <span id="total">0.00</span></span>
                 </div>
-                <button type="submit" id="btnOrder" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-lg uppercase">Hantar Order via WhatsApp</button>
+                <button type="submit" id="btnO" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black shadow-lg">HANTAR PESANAN</button>
             </form>
         </div>
+
+        <h3 class="font-black text-green-900 text-xs uppercase opacity-60 px-2">Log Pesanan Terkini</h3>
+        <div id="logPesanan" class="space-y-2"></div>
     </div>
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
         let db = [];
 
-        async function load() {
+        async function muatIndex() {
             const res = await fetch(API + "?action=getProduk");
             db = await res.json();
-            let h = ""; let opt = "<option value=''>Pilih Barang</option>";
-            db.forEach(i => {
-                const mapURL = `https://www.google.com/maps?q=${i.Coords}`;
-                h += `
-                <div class="bg-white p-6 rounded-[30px] shadow-md border-l-8 border-green-600">
-                    <div class="flex justify-between items-start mb-4">
-                        <div><h3 class="font-black text-slate-800 uppercase">${i.NamaBarang}</h3><p class="text-green-600 font-bold">RM ${Number(i.Harga).toFixed(2)}/kg</p></div>
-                        <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-lg font-bold">STOK: ${i.Stok}kg</span>
+            document.getElementById('produkGrid').innerHTML = db.map(i => `
+                <div class="bg-white p-5 rounded-[25px] shadow border-l-8 border-green-600">
+                    <div class="flex justify-between mb-3">
+                        <h4 class="font-black text-slate-800 uppercase">${i.NamaBarang}</h4>
+                        <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded font-bold">STOK: ${i.Stok}kg</span>
                     </div>
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-dashed">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">📍 Lokasi Pin:</p>
-                        <p class="text-[11px] font-bold text-slate-700 mb-3">${i.Lokasi}</p>
-                        <a href="${mapURL}" target="_blank" class="block w-full bg-blue-600 text-white text-center py-3 rounded-xl text-[10px] font-black">BUKA GOOGLE MAPS</a>
+                    <div class="flex items-center justify-between">
+                        <p class="text-green-600 font-black text-xl">RM ${Number(i.Harga).toFixed(2)}</p>
+                        <a href="http://googleusercontent.com/maps.google.com/5${i.Coords}" target="_blank" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black shadow">BUKA LOKASI PIN</a>
                     </div>
-                </div>`;
-                opt += `<option value="${i.NamaBarang}">${i.NamaBarang}</option>`;
-            });
-            document.getElementById("produkGrid").innerHTML = h;
-            document.getElementById("barang").innerHTML = opt;
+                </div>`).join('');
+            document.getElementById('barang').innerHTML = "<option value=''>Pilih Barang</option>" + db.map(i => `<option value="${i.NamaBarang}">${i.NamaBarang}</option>`).join('');
+
+            // Muat Log Pesanan
+            const resL = await fetch(API + "?action=getPesanan");
+            const dataL = await resL.json();
+            document.getElementById('logPesanan').innerHTML = dataL.reverse().slice(0, 5).map(i => `
+                <div class="bg-white/50 p-3 rounded-2xl flex justify-between items-center text-[10px] border border-green-100">
+                    <span class="font-bold text-slate-600 italic">${i.NamaPembeli} baru beli ${i.NamaBarang}</span>
+                    <span class="text-green-700 font-black">${i.Berat(kg)}kg</span>
+                </div>`).join('');
         }
 
         function kira() {
-            const b = document.getElementById("barang").value;
-            const w = document.getElementById("berat").value;
+            const b = document.getElementById('barang').value;
+            const w = document.getElementById('berat').value;
             const item = db.find(x => x.NamaBarang === b);
-            if(item && w) document.getElementById("total").innerText = (item.Harga * w).toFixed(2);
+            if(item && w) document.getElementById('total').innerText = (item.Harga * w).toFixed(2);
         }
 
-        document.getElementById("formOrder").onsubmit = async (e) => {
+        document.getElementById('fOrder').onsubmit = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById("btnOrder"); btn.disabled = true;
-            const payload = {
-                action: "tambahPesanan",
-                nama: document.getElementById("nama").value,
-                fon: document.getElementById("fon").value,
-                barang: document.getElementById("barang").value,
-                berat: document.getElementById("berat").value,
-                total: document.getElementById("total").innerText
-            };
-            await fetch(API, { method: "POST", body: JSON.stringify(payload) });
-            const wa = `https://wa.me/601131464321?text=Order Baru:%0ANama: ${payload.nama}%0ABarang: ${payload.barang}%0ABerat: ${payload.berat}kg%0ATotal: RM${payload.total}`;
-            window.location.href = wa;
+            const btn = document.getElementById('btnO'); btn.disabled = true;
+            const payload = { action: 'tambahPesanan', nama: document.getElementById('nama').value, fon: document.getElementById('fon').value, barang: document.getElementById('barang').value, berat: document.getElementById('berat').value, total: document.getElementById('total').innerText };
+            await fetch(API, { method: 'POST', body: JSON.stringify(payload) });
+            Swal.fire('Berjaya!', 'Pesanan anda direkodkan.', 'success').then(() => muatIndex());
         };
-        load();
+        muatIndex();
     </script>
 </body>
 </html>
