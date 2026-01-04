@@ -3,123 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin Kebun</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #1a1a1a; color: white; padding: 20px; }
-        .card { border: none; border-radius: 12px; }
-        .order-card { background: #2d2d2d; color: white; border-left: 5px solid #198754; margin-bottom: 15px; }
-        .status-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 5px; }
-        .btn-wa { background-color: #25D366; color: white; border: none; }
-        .btn-wa:hover { background-color: #128C7E; color: white; }
-    </style>
+    <title>Admin Agrotek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style> body { background-color: #0f172a; } </style>
 </head>
-<body>
-
-<div class="container" style="max-width: 900px;">
-    <h2 class="text-center mb-4">⚙️ Pengurusan Kedai Kebun</h2>
-
-    <div class="card p-4 mb-4 text-dark shadow">
-        <h5>Kemaskini Harga & Stok</h5>
-        <p class="text-muted small">Masukkan nama barang yang sama seperti dalam sheet untuk kemaskini.</p>
-        <div class="row g-2">
-            <div class="col-md-4">
-                <input type="text" id="aBarang" class="form-control" placeholder="Nama Barang (Cth: Cili)">
-            </div>
-            <div class="col-md-3">
-                <input type="number" id="aHarga" class="form-control" placeholder="Harga/kg">
-            </div>
-            <div class="col-md-3">
-                <input type="number" id="aStok" class="form-control" placeholder="Baki Stok (kg)">
-            </div>
-            <div class="col-md-2">
-                <button onclick="updateProduk()" id="btnUpdate" class="btn btn-primary w-100">Simpan</button>
+<body class="p-4">
+    <div class="max-w-2xl mx-auto">
+        <h2 class="text-white font-bold text-xl mb-6 flex items-center">⚙️ KEMASKINI STOK</h2>
+        
+        <div class="bg-white rounded-3xl p-6 mb-8 shadow-2xl">
+            <div class="space-y-4">
+                <input type="text" id="aBarang" placeholder="Nama Barang (Sama dlm Sheet)" class="w-full p-4 bg-gray-100 rounded-2xl outline-none">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="aHarga" placeholder="Harga/kg" class="p-4 bg-gray-100 rounded-2xl outline-none">
+                    <input type="number" id="aStok" placeholder="Baki Stok" class="p-4 bg-gray-100 rounded-2xl outline-none">
+                </div>
+                <button onclick="updateStok()" id="saveBtn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">SIMPAN DATA</button>
             </div>
         </div>
+
+        <h2 class="text-green-400 font-bold mb-4 uppercase tracking-widest text-sm">Pesanan Masuk</h2>
+        <div id="orderList" class="space-y-4"></div>
     </div>
 
-    <hr>
+    <script>
+        const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
 
-    <h4 class="mb-3 text-success">Senarai Pembeli & Pesanan</h4>
-    <div id="adminOrders">
-        <p class="text-center">Sedang memuatkan pesanan...</p>
-    </div>
-</div>
-
-<script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
-
-    // Ambil data pesanan dari sheet
-    async function muatAdmin() {
-        try {
-            const res = await fetch(API_URL + "?action=getPesanan");
+        async function muat() {
+            const res = await fetch(API + "?action=getPesanan");
             const data = await res.json();
-            let html = "";
-            
-            // Susun dari paling baru (atas)
+            let h = "";
             data.reverse().forEach(o => {
-                const waLink = `https://wa.me/${o.Telefon}?text=Salam%20${o.Nama},%20saya%20dari%20Kebun.%20Mengenai%20pesanan%20${o.Barang}%20sebanyak%20${o.Berat}kg...`;
-                
-                html += `
-                <div class="card order-card p-3 shadow-sm">
-                    <div class="d-flex justify-content-between align-items-start">
+                h += `<div class="bg-slate-800 border border-slate-700 p-5 rounded-3xl shadow-lg">
+                    <div class="flex justify-between items-start mb-4">
                         <div>
-                            <h5 class="mb-1 text-success">${o.Nama}</h5>
-                            <p class="mb-1">🛒 <b>${o.Barang}</b>: ${o.Berat}kg (RM ${o.Total})</p>
-                            <p class="mb-2 small text-light">Status: 
-                                <span class="badge bg-secondary status-badge">${o.StatusBayar === 'Selesai' ? '✅ Dibayar' : '❌ Belum Bayar'}</span>
-                                <span class="badge bg-secondary status-badge">${o.StatusAmbil === 'Selesai' ? '✅ Diambil' : '❌ Belum Ambil'}</span>
-                            </p>
+                            <h4 class="text-white font-bold">${o.Nama}</h4>
+                            <p class="text-green-400 text-sm font-bold">${o.Barang} - ${o.Berat}kg</p>
                         </div>
-                        <div class="text-end">
-                            <a href="${waLink}" target="_blank" class="btn btn-sm btn-wa mb-1 d-block">WhatsApp</a>
-                            <a href="tel:${o.Telefon}" class="btn btn-sm btn-outline-light mb-1 d-block">Call</a>
-                        </div>
+                        <span class="text-[10px] text-slate-400">${o.StatusBayar == 'Selesai' ? '✅ BAYAR' : '❌ BELUM'}</span>
                     </div>
-                    <div class="d-flex gap-2 mt-2">
-                        <button onclick="tukarStatus('${o.Nama}','${o.Telefon}','bayar')" class="btn btn-sm btn-info w-100 text-white">Set Dah Bayar</button>
-                        <button onclick="tukarStatus('${o.Nama}','${o.Telefon}','ambil')" class="btn btn-sm btn-warning w-100 text-dark">Set Dah Ambil</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="updateStatus('${o.Nama}','${o.Telefon}','bayar')" class="bg-blue-500/10 text-blue-400 border border-blue-500/50 py-2 rounded-xl text-xs font-bold">SET BAYAR</button>
+                        <button onclick="updateStatus('${o.Nama}','${o.Telefon}','ambil')" class="bg-orange-500/10 text-orange-400 border border-orange-500/50 py-2 rounded-xl text-xs font-bold">SET AMBIL</button>
                     </div>
                 </div>`;
             });
-            document.getElementById("adminOrders").innerHTML = html || "<p class='text-center'>Tiada pesanan lagi.</p>";
-        } catch (e) {
-            document.getElementById("adminOrders").innerHTML = "Gagal memuatkan data.";
+            document.getElementById("orderList").innerHTML = h;
         }
-    }
 
-    async function updateProduk() {
-        const btn = document.getElementById("btnUpdate");
-        btn.disabled = true;
-        
-        const payload = {
-            action: "kemaskiniStok",
-            namaBarang: document.getElementById("aBarang").value,
-            harga: parseFloat(document.getElementById("aHarga").value),
-            stok: parseFloat(document.getElementById("aStok").value),
-            lokasi: "Kebun Kita" // Boleh tukar mengikut keperluan
-        };
+        async function updateStok() {
+            const btn = document.getElementById("saveBtn");
+            btn.innerText = "Memproses..."; btn.disabled = true;
 
-        await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-        alert("Data produk dikemaskini!");
-        location.reload();
-    }
+            const payload = {
+                action: "kemaskiniStok",
+                namaBarang: document.getElementById("aBarang").value,
+                harga: document.getElementById("aHarga").value,
+                stok: document.getElementById("aStok").value
+            };
 
-    async function tukarStatus(nama, fon, jenis) {
-        if(!confirm("Kemaskini status pesanan ini?")) return;
-        
-        const payload = {
-            action: "kemaskiniStatus",
-            nama: nama,
-            fon: fon,
-            tipe: jenis
-        };
+            const res = await fetch(API, { method: "POST", body: JSON.stringify(payload) });
+            const result = await res.text();
 
-        await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-        muatAdmin();
-    }
+            if (result === "SUCCESS") {
+                Swal.fire({ icon: 'success', title: 'Berjaya!', text: 'Stok telah dikemaskini.', timer: 2000, showConfirmButton: false });
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                Swal.fire('Ralat', 'Barang tidak dijumpai', 'error');
+                btn.innerText = "SIMPAN DATA"; btn.disabled = false;
+            }
+        }
 
-    muatAdmin();
-</script>
+        async function updateStatus(n, f, t) {
+            await fetch(API, { method: "POST", body: JSON.stringify({action:"kemaskiniStatus", nama:n, fon:f, tipe:t}) });
+            Swal.fire({ icon: 'success', title: 'Status Dikemaskini', timer: 1000, showConfirmButton: false });
+            muat();
+        }
+        muat();
+    </script>
 </body>
 </html>
