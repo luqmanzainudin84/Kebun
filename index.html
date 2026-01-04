@@ -10,6 +10,8 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
         .card-shadow { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02); }
+        /* Hilangkan arrow pada input number */
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="pb-10">
@@ -28,21 +30,29 @@
         </div>
 
         <div class="bg-white rounded-[40px] p-8 card-shadow border border-green-50">
-            <h2 class="text-[#15803d] font-black uppercase tracking-widest text-center mb-6">Borang Pesanan Cepat</h2>
+            <h2 class="text-[#15803d] font-black uppercase tracking-widest text-center mb-6">Borang Pesanan</h2>
             
             <div class="space-y-4">
-                <input type="text" id="uNama" placeholder="Nama Anda" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold transition-all">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Nama Anda</label>
+                    <input type="text" id="uNama" placeholder="Cth: Ahmad" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold">
+                </div>
                 
-                <input type="number" id="uFon" placeholder="WhatsApp (601...)" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold transition-all">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">No. WhatsApp</label>
+                    <input type="number" id="uFon" placeholder="60123456789" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold">
+                </div>
                 
-                <select id="uBarang" onchange="updateHarga()" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-slate-700 appearance-none">
-                    <option value="">Pilih Barang</option>
-                </select>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Pilih Barang</label>
+                    <select id="uBarang" onchange="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-slate-700 appearance-none">
+                        <option value="">-- Pilih --</option>
+                    </select>
+                </div>
 
-                <div class="flex items-center bg-slate-50 rounded-2xl border-2 border-slate-100 p-2">
-                    <button onclick="adjustBerat(-1)" class="w-14 h-14 bg-white rounded-xl shadow-sm font-black text-xl text-slate-600">-</button>
-                    <input type="number" id="uBerat" value="1" min="1" oninput="updateHarga()" class="flex-1 text-center bg-transparent font-black text-xl outline-none">
-                    <button onclick="adjustBerat(1)" class="w-14 h-14 bg-white rounded-xl shadow-sm font-black text-xl text-slate-600">+</button>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Berat (KG) - Boleh letak perpuluhan</label>
+                    <input type="number" step="0.01" id="uBerat" placeholder="Cth: 0.4 atau 1.5" oninput="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-lg">
                 </div>
 
                 <div class="bg-green-600 rounded-2xl p-5 text-center shadow-lg shadow-green-200">
@@ -56,10 +66,7 @@
             </div>
         </div>
 
-        <div class="text-center">
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Log Tempahan Terkini</p>
-            <div id="logPesanan" class="space-y-2"></div>
-        </div>
+        <div id="logPesanan" class="space-y-2 text-center"></div>
     </div>
 
     <script>
@@ -71,7 +78,6 @@
                 const res = await fetch(API + "?action=getProduk");
                 dataProduk = await res.json();
                 
-                // Papar Produk (Hanya yang ada NamaBarang)
                 const container = document.getElementById('produkContainer');
                 const select = document.getElementById('uBarang');
                 
@@ -84,23 +90,20 @@
                         </div>
                         <div class="text-right">
                             <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Stok: ${p.Stok}kg</span>
-                            <br>
-                            <a href="https://www.google.com/maps/search/?api=1&query=${p.Coords}" target="_blank" class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Lokasi Pin</a>
                         </div>
                     </div>
                 `).join('');
 
-                select.innerHTML = '<option value="">Pilih Barang</option>' + 
+                select.innerHTML = '<option value="">-- Pilih --</option>' + 
                     dataProduk.map(p => `<option value="${p.NamaBarang}" data-harga="${p.Hargakg}">${p.NamaBarang}</option>`).join('');
 
-                // Muat Log Pesanan
                 const resO = await fetch(API + "?action=getPesanan");
                 const dataO = await resO.json();
                 document.getElementById('logPesanan').innerHTML = dataO.slice(-3).reverse().map(o => `
-                    <div class="bg-white/50 py-3 px-6 rounded-full inline-block text-[10px] font-bold text-slate-500 shadow-sm border border-white">
+                    <div class="bg-white/50 py-3 px-6 rounded-full inline-block text-[10px] font-bold text-slate-500 border border-white mb-2">
                         <span class="text-blue-600">${o.NamaPembeli}</span> menempah ${o.NamaBarang} (${o.Beratkg}kg)
                     </div>
-                `).join('<br>');
+                `).join('');
 
             } catch (e) { console.error("Gagal muat data"); }
         }
@@ -108,16 +111,8 @@
         function updateHarga() {
             const select = document.getElementById('uBarang');
             const harga = select.options[select.selectedIndex]?.dataset.harga || 0;
-            const berat = document.getElementById('uBerat').value;
-            document.getElementById('uTotal').innerText = "RM " + (harga * berat).toFixed(2);
-        }
-
-        function adjustBerat(val) {
-            const input = document.getElementById('uBerat');
-            let newV = parseInt(input.value) + val;
-            if (newV < 1) newV = 1;
-            input.value = newV;
-            updateHarga();
+            const berat = document.getElementById('uBerat').value || 0;
+            document.getElementById('uTotal').innerText = "RM " + (parseFloat(harga) * parseFloat(berat)).toFixed(2);
         }
 
         async function hantarPesanan() {
@@ -128,7 +123,7 @@
             const berat = document.getElementById('uBerat').value;
             const total = document.getElementById('uTotal').innerText.replace('RM ', '');
 
-            if (!nama || !fon || !barang) return Swal.fire('Ops!', 'Lengkapkan borang dahulu', 'warning');
+            if (!nama || !fon || !barang || !berat || berat <= 0) return Swal.fire('Ops!', 'Lengkapkan borang dengan berat yang betul', 'warning');
 
             btn.disabled = true;
             btn.innerText = "Memproses...";
@@ -140,9 +135,9 @@
                 });
                 const result = await resp.text();
                 if (result === "SUCCESS") {
-                    Swal.fire('Berjaya!', 'Pesanan telah direkodkan. Sila tunggu respon kami.', 'success');
-                    document.getElementById('uNama').value = "";
-                    document.getElementById('uFon').value = "";
+                    Swal.fire('Berjaya!', 'Pesanan anda telah dihantar.', 'success');
+                    document.getElementById('uBerat').value = "";
+                    document.getElementById('uTotal').innerText = "RM 0.00";
                     muatData();
                 }
             } catch (e) {
