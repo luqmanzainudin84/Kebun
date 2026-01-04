@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koperasi Perak - Segar Dari Ladang</title>
+    <title>Koperasi Perak - Produk Pertanian</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -11,6 +11,9 @@
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
         .card-shadow { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* Memastikan butang lokasi boleh ditekan dengan lancar */
+        .btn-lokasi { transition: all 0.2s; cursor: pointer; }
+        .btn-lokasi:active { transform: scale(0.95); }
     </style>
 </head>
 <body class="pb-10">
@@ -23,12 +26,15 @@
     <div class="max-w-md mx-auto px-4 -mt-10 space-y-6">
         
         <div id="produkContainer" class="space-y-4">
+            <div class="bg-white p-8 rounded-[30px] text-center shadow-sm">
+                <p class="text-slate-400 font-bold animate-pulse text-sm text-black">Memuatkan produk...</p>
             </div>
+        </div>
 
         <div class="bg-white rounded-[40px] p-8 card-shadow border border-green-50">
             <h2 class="text-[#15803d] font-black uppercase tracking-widest text-center mb-6">Borang Pesanan</h2>
             
-            <div class="space-y-4">
+            <div class="space-y-4 text-black">
                 <div>
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Nama Anda</label>
                     <input type="text" id="uNama" placeholder="Cth: Ahmad" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold">
@@ -76,7 +82,6 @@
 
         async function muatData() {
             try {
-                // 1. Muat Produk (Tab Produk Kolum A-E)
                 const resP = await fetch(API + "?action=getProduk");
                 const dataProduk = await resP.json();
                 
@@ -84,20 +89,37 @@
                 const select = document.getElementById('uBarang');
                 
                 container.innerHTML = dataProduk.map(p => {
-                    // Gunakan koordinat dari Kolum E untuk pautan Maps
                     const mapsUrl = p.Coords ? `https://www.google.com/maps?q=${p.Coords}` : "#";
                     return `
-                    <div class="bg-white p-6 rounded-[35px] card-shadow border-l-[8px] border-green-500 flex justify-between items-center">
-                        <div class="flex-1">
-                            <h3 class="font-black text-slate-800 uppercase text-xl leading-none mb-1">${p.NamaBarang}</h3>
-                            <div class="flex items-center gap-2">
-                                <span class="text-green-600 font-black text-sm">RM ${p.Hargakg}/kg</span>
-                                ${p.Coords ? `<a href="${mapsUrl}" target="_blank" class="text-[9px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-bold uppercase tracking-tighter">📍 Lokasi Pin</a>` : `<span class="text-[9px] text-slate-300 font-bold uppercase italic">Tiada Pin</span>`}
+                    <div class="bg-white p-6 rounded-[35px] card-shadow border-l-[8px] border-green-500 relative overflow-hidden">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h3 class="font-black text-slate-800 uppercase text-2xl leading-tight mb-1">${p.NamaBarang}</h3>
+                                
+                                <div class="flex flex-col gap-3">
+                                    <div class="leading-none">
+                                        <span class="text-green-600 font-black text-xl">RM ${p.Hargakg}</span>
+                                        <span class="text-slate-400 text-[10px] font-bold">/KG</span>
+                                    </div>
+
+                                    ${p.Coords ? `
+                                    <a href="${mapsUrl}" target="_blank" class="btn-lokasi flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-xl border border-blue-100 w-fit shadow-sm">
+                                        <span class="text-sm">📍</span>
+                                        <span class="text-[10px] font-black uppercase tracking-tighter">Lokasi Pin</span>
+                                    </a>` : ''}
+
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-[9px] text-slate-400 font-black uppercase tracking-tight">🏠 ${p.Lokasi || 'Rumah Mak'}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase mt-1">📍 ${p.Lokasi || 'Rumah Mak'}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Stok: ${p.Stok}kg</span>
+
+                            <div class="text-right">
+                                <div class="bg-green-100 text-green-700 px-3 py-1.5 rounded-xl border border-green-200">
+                                    <p class="text-[8px] font-black uppercase opacity-60 leading-none mb-0.5">Stok</p>
+                                    <p class="text-xs font-black leading-none">${p.Stok}KG</p>
+                                </div>
+                            </div>
                         </div>
                     </div>`;
                 }).join('');
@@ -105,14 +127,13 @@
                 select.innerHTML = '<option value="">-- Pilih Barang --</option>' + 
                     dataProduk.map(p => `<option value="${p.NamaBarang}" data-harga="${p.Hargakg}">${p.NamaBarang}</option>`).join('');
 
-                // 2. Muat Log Pesanan (Tab Pesanan Kolum B-E)
                 const resO = await fetch(API + "?action=getPesanan");
                 const dataO = await resO.json();
                 const logContainer = document.getElementById('logPesanan');
                 
                 if(dataO.length > 0) {
                     logContainer.innerHTML = dataO.slice(-3).reverse().map(o => `
-                        <div class="bg-white/80 py-3 px-6 rounded-2xl w-full flex justify-between items-center text-[11px] font-bold text-slate-500 border border-white shadow-sm">
+                        <div class="bg-white/80 py-3 px-6 rounded-2xl w-full flex justify-between items-center text-[10px] font-bold text-slate-500 border border-white shadow-sm">
                             <span><b class="text-slate-800 uppercase">${o.NamaPembeli}</b> menempah ${o.NamaBarang}</span>
                             <span class="text-green-600 font-black">${o.Beratkg}kg</span>
                         </div>
@@ -151,7 +172,7 @@
                 const result = await resp.text();
                 if (result === "SUCCESS") {
                     await Swal.fire('Berjaya!', 'Pesanan anda telah direkodkan.', 'success');
-                    location.reload(); // Refresh untuk update stok dan log
+                    location.reload();
                 }
             } catch (e) {
                 Swal.fire('Ralat', 'Sistem sibuk, cuba lagi.', 'error');
