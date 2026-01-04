@@ -1,95 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Koperasi Agrotek Perak</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
+        .card-shadow { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02); }
+    </style>
 </head>
-<body class="bg-green-50 pb-10">
-    <div class="bg-green-700 text-white p-10 rounded-b-[45px] text-center shadow-lg mb-6">
-        <h1 class="text-2xl font-black italic">AGROTEK PERAK</h1>
-        <p class="text-[10px] opacity-70 uppercase tracking-widest">Segar Dari Ladang Ke Meja Anda</p>
+<body class="pb-10">
+
+    <div class="bg-[#15803d] text-white pt-10 pb-16 px-6 rounded-b-[50px] shadow-lg text-center">
+        <h1 class="text-3xl font-black tracking-tighter uppercase">Agrotek Perak</h1>
+        <p class="text-green-100 text-xs font-bold opacity-80 mt-1">Segar Dari Ladang Ke Meja Anda</p>
     </div>
 
-    <div class="max-w-md mx-auto px-4 space-y-6">
-        <div id="produkGrid" class="space-y-4"></div>
-
-        <div class="bg-white p-8 rounded-[35px] shadow-xl border border-green-100">
-            <h3 class="font-black text-green-800 mb-4 border-b pb-2 uppercase text-sm">Borang Tempahan Cepat</h3>
-            <form id="fOrder" class="space-y-4">
-                <input type="text" id="nama" placeholder="Nama Anda" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border" required>
-                <input type="number" id="fon" placeholder="No Telefon (601...)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border" required>
-                <select id="barang" onchange="kira()" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border font-bold" required></select>
-                <input type="number" id="berat" step="0.1" oninput="kira()" placeholder="Berat (kg)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border font-bold" required>
-                <div class="p-4 bg-green-700 rounded-2xl text-white flex justify-between font-black">
-                    <span>TOTAL:</span><span>RM <span id="total">0.00</span></span>
-                </div>
-                <button type="submit" id="btnO" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black shadow-lg">TEMPAH SEKARANG</button>
-            </form>
+    <div class="max-w-md mx-auto px-4 -mt-10 space-y-6">
+        
+        <div id="produkContainer" class="space-y-4">
+            <div class="bg-white p-8 rounded-[30px] text-center shadow-sm">
+                <p class="text-slate-400 font-bold animate-pulse text-sm">Memuatkan produk terkini...</p>
+            </div>
         </div>
 
-        <div class="bg-white/60 p-5 rounded-[30px]">
-            <h3 class="font-black text-slate-500 text-[10px] uppercase mb-3 text-center tracking-widest">LOG TEMPAHAN TERKINI</h3>
+        <div class="bg-white rounded-[40px] p-8 card-shadow border border-green-50">
+            <h2 class="text-[#15803d] font-black uppercase tracking-widest text-center mb-6">Borang Pesanan Cepat</h2>
+            
+            <div class="space-y-4">
+                <input type="text" id="uNama" placeholder="Nama Anda" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold transition-all">
+                
+                <input type="number" id="uFon" placeholder="WhatsApp (601...)" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold transition-all">
+                
+                <select id="uBarang" onchange="updateHarga()" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-slate-700 appearance-none">
+                    <option value="">Pilih Barang</option>
+                </select>
+
+                <div class="flex items-center bg-slate-50 rounded-2xl border-2 border-slate-100 p-2">
+                    <button onclick="adjustBerat(-1)" class="w-14 h-14 bg-white rounded-xl shadow-sm font-black text-xl text-slate-600">-</button>
+                    <input type="number" id="uBerat" value="1" min="1" oninput="updateHarga()" class="flex-1 text-center bg-transparent font-black text-xl outline-none">
+                    <button onclick="adjustBerat(1)" class="w-14 h-14 bg-white rounded-xl shadow-sm font-black text-xl text-slate-600">+</button>
+                </div>
+
+                <div class="bg-green-600 rounded-2xl p-5 text-center shadow-lg shadow-green-200">
+                    <p class="text-green-100 text-[10px] font-black uppercase tracking-widest">Jumlah Perlu Bayar</p>
+                    <h3 id="uTotal" class="text-white text-3xl font-black">RM 0.00</h3>
+                </div>
+
+                <button onclick="hantarPesanan()" id="btnHantar" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-black active:scale-95 transition-all shadow-xl">
+                    Sahkan Pesanan
+                </button>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Log Tempahan Terkini</p>
             <div id="logPesanan" class="space-y-2"></div>
         </div>
     </div>
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
-        let db = [];
+        let dataProduk = [];
 
-        async function muatIndex() {
-            const res = await fetch(API + "?action=getProduk");
-            db = await res.json();
-            document.getElementById('produkGrid').innerHTML = db.map(i => `
-                <div class="bg-white p-6 rounded-[30px] shadow-md border-l-8 border-green-600">
-                    <div class="flex justify-between mb-2">
-                        <h4 class="font-black text-slate-800 uppercase">${i.NamaBarang}</h4>
-                        <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded font-bold">STOK: ${i.Stok}kg</span>
+        async function muatData() {
+            try {
+                const res = await fetch(API + "?action=getProduk");
+                dataProduk = await res.json();
+                
+                // Papar Produk (Hanya yang ada NamaBarang)
+                const container = document.getElementById('produkContainer');
+                const select = document.getElementById('uBarang');
+                
+                container.innerHTML = dataProduk.map(p => `
+                    <div class="bg-white p-6 rounded-[35px] card-shadow border-l-[8px] border-green-500 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-black text-slate-800 uppercase text-lg">${p.NamaBarang}</h3>
+                            <p class="text-green-600 font-black text-sm">RM ${p.Hargakg}/kg</p>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase mt-1">📍 ${p.LokasiNamaLinkMaps}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Stok: ${p.Stok}kg</span>
+                            <br>
+                            <a href="https://www.google.com/maps/search/?api=1&query=${p.Coords}" target="_blank" class="inline-block mt-3 bg-blue-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Lokasi Pin</a>
+                        </div>
                     </div>
-                    <p class="text-green-600 font-black text-xl mb-3">RM ${Number(i.Hargakg).toFixed(2)}/kg</p>
-                    <a href="${i.LokasiNamaLinkMaps}" target="_blank" class="block w-full bg-blue-600 text-white text-center py-2 rounded-xl text-[10px] font-black uppercase">Lihat Lokasi Jualan</a>
-                </div>`).join('');
-            
-            document.getElementById('barang').innerHTML = "<option value=''>Pilih Barang</option>" + 
-                db.map(i => `<option value="${i.NamaBarang}">${i.NamaBarang}</option>`).join('');
-            
-            muatLog();
+                `).join('');
+
+                select.innerHTML = '<option value="">Pilih Barang</option>' + 
+                    dataProduk.map(p => `<option value="${p.NamaBarang}" data-harga="${p.Hargakg}">${p.NamaBarang}</option>`).join('');
+
+                // Muat Log Pesanan
+                const resO = await fetch(API + "?action=getPesanan");
+                const dataO = await resO.json();
+                document.getElementById('logPesanan').innerHTML = dataO.slice(-3).reverse().map(o => `
+                    <div class="bg-white/50 py-3 px-6 rounded-full inline-block text-[10px] font-bold text-slate-500 shadow-sm border border-white">
+                        <span class="text-blue-600">${o.NamaPembeli}</span> menempah ${o.NamaBarang} (${o.Beratkg}kg)
+                    </div>
+                `).join('<br>');
+
+            } catch (e) { console.error("Gagal muat data"); }
         }
 
-        async function muatLog() {
-            const res = await fetch(API + "?action=getPesanan");
-            const data = await res.json();
-            document.getElementById('logPesanan').innerHTML = data.reverse().slice(0, 5).map(i => `
-                <div class="bg-white p-3 rounded-xl flex justify-between items-center shadow-sm border border-slate-100 text-[10px]">
-                    <span class="text-slate-600"><b>${i.NamaPembeli}</b> menempah ${i.NamaBarang}</span>
-                    <span class="text-green-700 font-black">${i.Beratkg}kg</span>
-                </div>`).join('');
+        function updateHarga() {
+            const select = document.getElementById('uBarang');
+            const harga = select.options[select.selectedIndex]?.dataset.harga || 0;
+            const berat = document.getElementById('uBerat').value;
+            document.getElementById('uTotal').innerText = "RM " + (harga * berat).toFixed(2);
         }
 
-        function kira() {
-            const b = document.getElementById('barang').value;
-            const w = document.getElementById('berat').value;
-            const itm = db.find(x => x.NamaBarang === b);
-            if(itm && w) document.getElementById('total').innerText = (Number(itm.Hargakg) * w).toFixed(2);
+        function adjustBerat(val) {
+            const input = document.getElementById('uBerat');
+            let newV = parseInt(input.value) + val;
+            if (newV < 1) newV = 1;
+            input.value = newV;
+            updateHarga();
         }
 
-        document.getElementById('fOrder').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnO'); btn.disabled = true; btn.innerText = "Memproses...";
-            const payload = { 
-                action: 'tambahPesanan', 
-                nama: document.getElementById('nama').value, 
-                fon: document.getElementById('fon').value, 
-                barang: document.getElementById('barang').value, 
-                berat: document.getElementById('berat').value, 
-                total: document.getElementById('total').innerText 
-            };
-            await fetch(API, { method: 'POST', body: JSON.stringify(payload) });
-            Swal.fire('Berjaya!', 'Tempahan anda telah direkodkan.', 'success').then(() => location.reload());
-        };
-        muatIndex();
+        async function hantarPesanan() {
+            const btn = document.getElementById('btnHantar');
+            const nama = document.getElementById('uNama').value;
+            const fon = document.getElementById('uFon').value;
+            const barang = document.getElementById('uBarang').value;
+            const berat = document.getElementById('uBerat').value;
+            const total = document.getElementById('uTotal').innerText.replace('RM ', '');
+
+            if (!nama || !fon || !barang) return Swal.fire('Ops!', 'Lengkapkan borang dahulu', 'warning');
+
+            btn.disabled = true;
+            btn.innerText = "Memproses...";
+
+            try {
+                const resp = await fetch(API, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'tambahPesanan', nama, fon, barang, berat, total })
+                });
+                const result = await resp.text();
+                if (result === "SUCCESS") {
+                    Swal.fire('Berjaya!', 'Pesanan telah direkodkan. Sila tunggu respon kami.', 'success');
+                    document.getElementById('uNama').value = "";
+                    document.getElementById('uFon').value = "";
+                    muatData();
+                }
+            } catch (e) {
+                Swal.fire('Ralat', 'Gagal hantar pesanan', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Sahkan Pesanan";
+            }
+        }
+
+        muatData();
     </script>
 </body>
 </html>
