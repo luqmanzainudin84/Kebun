@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koperasi Perak</title>
+    <title>Jualan Produk Pertanian</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
         .card-shadow { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02); }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        /* Pastikan pautan boleh ditekan dengan jelas */
-        .btn-lokasi { pointer-events: auto !important; cursor: pointer !important; z-index: 50; }
+        /* Memastikan pautan lokasi berada di lapisan atas dan boleh dikesan jari */
+        .link-lokasi { position: relative; z-index: 99; cursor: pointer; pointer-events: auto !important; }
     </style>
 </head>
 <body class="pb-10">
 
     <div class="bg-[#15803d] text-white pt-10 pb-16 px-6 rounded-b-[50px] shadow-lg text-center">
-        <h1 class="text-3xl font-black tracking-tighter uppercase leading-none">KOPERASI PERAK</h1>
+        <h1 class="text-3xl font-black tracking-tighter uppercase leading-none">JUALAN PRODUK PERTANIAN</h1>
         <p class="text-green-100 text-xs font-bold opacity-80 mt-2 uppercase tracking-widest">Segar Dari Ladang</p>
     </div>
 
@@ -36,38 +35,36 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Nama Anda</label>
-                    <input type="text" id="uNama" placeholder="Cth: Ahmad" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold transition-all">
+                    <input type="text" id="uNama" placeholder="Cth: Ahmad" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold">
                 </div>
                 
                 <div>
                     <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">No. WhatsApp</label>
-                    <input type="number" id="uFon" placeholder="60123456789" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold transition-all">
+                    <input type="number" id="uFon" placeholder="60123456789" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold">
                 </div>
                 
                 <div>
                     <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Pilih Barang</label>
-                    <select id="uBarang" onchange="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-slate-700 appearance-none">
+                    <select id="uBarang" onchange="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-slate-700">
                         <option value="">-- Pilih --</option>
                     </select>
                 </div>
 
                 <div>
                     <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Berat (KG)</label>
-                    <input type="number" step="0.01" id="uBerat" placeholder="Cth: 0.4" oninput="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-lg">
+                    <input type="number" step="0.01" id="uBerat" placeholder="1" oninput="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-lg">
                 </div>
 
-                <div class="bg-green-600 rounded-2xl p-5 text-center shadow-lg shadow-green-200">
+                <div class="bg-green-600 rounded-2xl p-5 text-center">
                     <p class="text-green-100 text-[10px] font-black uppercase tracking-widest">Jumlah Perlu Bayar</p>
                     <h3 id="uTotal" class="text-white text-3xl font-black">RM 0.00</h3>
                 </div>
 
-                <button onclick="hantarPesanan()" id="btnHantar" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-black active:scale-95 transition-all shadow-xl">
+                <button onclick="hantarPesanan()" id="btnHantar" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl">
                     Sahkan Pesanan
                 </button>
             </div>
         </div>
-
-        <div id="logPesanan" class="space-y-2 text-center"></div>
     </div>
 
     <script>
@@ -83,42 +80,33 @@
                 const select = document.getElementById('uBarang');
                 
                 container.innerHTML = dataProduk.map(p => {
-                    // Penambahbaikan link Google Maps
-                    let mapsUrl = "#";
-                    if(p.Coords) {
-                        // Bersihkan sebarang simbol pelik jika ada
-                        let koordinat = p.Coords.toString().trim();
-                        mapsUrl = "https://www.google.com/maps?q=" + koordinat;
-                    }
+                    // Logik untuk link Google Maps
+                    let hasCoords = p.Coords && p.Coords.toString().includes(',');
+                    let mapsUrl = hasCoords ? `https://www.google.com/maps?q=${p.Coords}` : "#";
                     
                     return `
-                    <div class="bg-white p-6 rounded-[35px] card-shadow border-l-[8px] border-green-500 flex justify-between items-center relative">
+                    <div class="bg-white p-6 rounded-[35px] card-shadow border-l-[8px] border-green-500 flex justify-between items-center relative overflow-hidden">
                         <div class="flex-1">
                             <h3 class="font-black text-slate-800 uppercase text-lg leading-none mb-1">${p.NamaBarang}</h3>
                             <p class="text-green-600 font-black text-sm">RM ${p.Hargakg}/kg</p>
-                            <p class="text-[9px] font-bold text-slate-400 uppercase mt-2 tracking-tighter">📍 ${p.LokasiNamaLinkMaps}</p>
-                        </div>
-                        <div class="text-right flex flex-col items-end">
-                            <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase mb-3">Stok: ${p.Stok}kg</span>
                             
-                            ${p.Coords ? 
-                                `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-lokasi bg-blue-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-md active:bg-blue-800 block">Lokasi Pin</a>` : 
-                                `<span class="text-[8px] text-slate-300 font-bold uppercase italic">Tiada Pin</span>`
-                            }
+                            <div class="mt-2">
+                                ${hasCoords ? 
+                                    `<a href="${mapsUrl}" target="_blank" class="link-lokasi flex items-center gap-1 text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-lg font-bold w-fit">
+                                        📍 ${p.LokasiNamaLinkMaps || 'Klik Lokasi'}
+                                     </a>` : 
+                                    `<span class="text-[9px] font-bold text-slate-300 uppercase tracking-tighter">📍 ${p.LokasiNamaLinkMaps} (Tiada Pin)</span>`
+                                }
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Stok: ${p.Stok}kg</span>
                         </div>
                     </div>`;
                 }).join('');
 
                 select.innerHTML = '<option value="">-- Pilih --</option>' + 
                     dataProduk.map(p => `<option value="${p.NamaBarang}" data-harga="${p.Hargakg}">${p.NamaBarang}</option>`).join('');
-
-                const resO = await fetch(API + "?action=getPesanan");
-                const dataO = await resO.json();
-                document.getElementById('logPesanan').innerHTML = dataO.slice(-3).reverse().map(o => `
-                    <div class="bg-white/50 py-3 px-6 rounded-full inline-block text-[10px] font-bold text-slate-500 border border-white mb-2 shadow-sm">
-                        <span class="text-blue-600">${o.NamaPembeli}</span> menempah ${o.NamaBarang}
-                    </div>
-                `).join('');
 
             } catch (e) { console.error("Gagal muat data"); }
         }
@@ -138,25 +126,20 @@
             const berat = document.getElementById('uBerat').value;
             const total = document.getElementById('uTotal').innerText.replace('RM ', '');
 
-            if (!nama || !fon || !barang || !berat || berat <= 0) return Swal.fire('Ops!', 'Lengkapkan borang dengan betul', 'warning');
+            if (!nama || !fon || !barang || !berat) return Swal.fire('Ops!', 'Lengkapkan borang', 'warning');
 
             btn.disabled = true;
             btn.innerText = "Memproses...";
 
             try {
-                const resp = await fetch(API, {
+                await fetch(API, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'tambahPesanan', nama, fon, barang, berat, total })
                 });
-                const result = await resp.text();
-                if (result === "SUCCESS") {
-                    Swal.fire('Berjaya!', 'Pesanan anda telah dihantar.', 'success');
-                    document.getElementById('uBerat').value = "";
-                    document.getElementById('uTotal').innerText = "RM 0.00";
-                    muatData();
-                }
+                Swal.fire('Berjaya!', 'Pesanan dihantar', 'success');
+                muatData();
             } catch (e) {
-                Swal.fire('Ralat', 'Gagal hantar pesanan', 'error');
+                Swal.fire('Ralat', 'Gagal', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Sahkan Pesanan";
