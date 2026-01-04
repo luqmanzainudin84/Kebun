@@ -1,89 +1,35 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Koperasi Agrotek Perak</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f0fdf4; }
-        .agrotek-header { background: linear-gradient(135deg, #166534 0%, #22c55e 100%); }
-    </style>
-</head>
-<body class="pb-10">
-    <div class="agrotek-header text-white py-12 px-6 rounded-b-[50px] shadow-2xl text-center mb-8">
-        <h1 class="text-3xl font-extrabold tracking-tight">KOPERASI AGROTEK</h1>
-        <p class="text-green-100 opacity-90">Negeri Perak Berhad - Hasil Segar</p>
-    </div>
+<div id="produkGrid" class="grid grid-cols-1 gap-4"></div>
 
-    <div class="max-w-md mx-auto px-4">
-        <h2 class="font-bold text-green-900 mb-4 flex items-center"><span class="bg-green-600 w-2 h-5 rounded mr-2"></span> Hasil Hari Ini</h2>
-        <div id="produkGrid" class="grid grid-cols-1 gap-4 mb-8"></div>
+<script>
+    async function loadProduk() {
+        const res = await fetch(API + "?action=getProduk");
+        const db = await res.json();
+        let html = "";
 
-        <div class="bg-white p-6 rounded-[35px] shadow-xl border border-green-50 mb-10">
-            <h3 class="font-bold text-green-800 mb-5 border-b pb-2">Borang Pesanan Cepat</h3>
-            <form id="orderForm" class="space-y-4">
-                <input type="text" id="nama" placeholder="Nama Penuh" class="w-full p-4 bg-gray-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500" required>
-                <input type="number" id="fon" placeholder="No. WhatsApp (6012...)" class="w-full p-4 bg-gray-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-green-500" required>
-                <select id="barang" onchange="kira()" class="w-full p-4 bg-gray-50 rounded-2xl border-none outline-none" required></select>
-                <input type="number" id="berat" step="0.1" oninput="kira()" placeholder="Berat (KG)" class="w-full p-4 bg-gray-50 rounded-2xl border-none outline-none" required>
-                <div class="bg-yellow-400/20 p-5 rounded-2xl flex justify-between items-center">
-                    <span class="font-bold text-yellow-900">Jumlah:</span>
-                    <span class="text-2xl font-black text-green-700">RM <span id="total">0.00</span></span>
+        db.forEach(item => {
+            // Link Maps automatik berdasarkan nama lokasi
+            const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.Lokasi)}`;
+            
+            html += `
+            <div class="bg-white p-5 rounded-[30px] shadow-lg border-l-8 border-green-600">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-black text-gray-800 uppercase text-lg">${item.NamaBarang}</h3>
+                        <p class="text-green-600 font-bold">RM ${item.Harga.toFixed(2)} /kg</p>
+                    </div>
+                    <span class="bg-orange-100 text-orange-700 text-[10px] px-2 py-1 rounded-lg font-bold tracking-tighter">STOK: ${item.Stok}KG</span>
                 </div>
-                <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-green-700 transition transform active:scale-95">HANTAR PESANAN 🚀</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
-        let db = [];
-
-        async function load() {
-            const res = await fetch(API + "?action=getProduk");
-            db = await res.json();
-            let h = ""; let opt = "<option value=''>Pilih Barang</option>";
-            db.forEach(i => {
-                const mapLink = `https://www.google.com/maps/search/${encodeURIComponent(i.Lokasi)}`;
-                h += `<div class="bg-white p-5 rounded-[30px] shadow-md border-l-8 border-green-600">
-                    <div class="flex justify-between items-start">
-                        <div><h6 class="font-black text-gray-800 uppercase">${i.NamaBarang}</h6><p class="text-xl font-bold text-green-600">RM${i.Harga.toFixed(2)}/kg</p></div>
-                        <span class="bg-green-100 text-green-700 text-[10px] px-2 py-1 rounded-lg font-bold">Stok: ${i.Stok}kg</span>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-gray-100">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase">📍 Lokasi Jualan:</p>
-                        <p class="text-xs font-bold text-gray-700 mb-2">${i.Lokasi || 'Kebun Perak'}</p>
-                        <a href="${mapLink}" target="_blank" class="block w-full bg-blue-600 text-white text-center py-2 rounded-xl text-[10px] font-bold">PANDU KE LOKASI (MAPS)</a>
-                    </div>
-                </div>`;
-                opt += `<option value="${i.NamaBarang}">${i.NamaBarang}</option>`;
-            });
-            document.getElementById("produkGrid").innerHTML = h;
-            document.getElementById("barang").innerHTML = opt;
-        }
-
-        function kira() {
-            const b = document.getElementById("barang").value;
-            const w = document.getElementById("berat").value;
-            const item = db.find(x => x.NamaBarang === b);
-            if(item && w) document.getElementById("total").innerText = (item.Harga * w).toFixed(2);
-        }
-
-        document.getElementById("orderForm").onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById("submitBtn");
-            btn.disabled = true; btn.innerText = "Sila Tunggu...";
-            const data = { action: "tambahPesanan", nama: document.getElementById("nama").value, fon: document.getElementById("fon").value, barang: document.getElementById("barang").value, berat: document.getElementById("berat").value, total: document.getElementById("total").innerText };
-            const response = await fetch(API, { method: "POST", body: JSON.stringify(data) });
-            const resText = await response.text();
-            if (resText === "SUCCESS") {
-                Swal.fire({ title: 'Berjaya!', text: 'Pesanan telah dihantar.', icon: 'success', confirmButtonColor: '#166534' }).then(() => location.reload());
-            }
-        };
-        load();
-    </script>
-</body>
-</html>
+                
+                <div class="mt-4 bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-200">
+                    <p class="text-[9px] font-black text-slate-400 uppercase mb-1">📍 Lokasi Jualan:</p>
+                    <p class="text-xs font-bold text-slate-700 mb-3">${item.Lokasi || 'Kebun Perak'}</p>
+                    <a href="${mapLink}" target="_blank" class="block w-full bg-blue-600 text-white text-center py-3 rounded-xl text-[10px] font-black shadow-md hover:bg-blue-700 transition">
+                        🚗 PANDU KE LOKASI (MAPS)
+                    </a>
+                </div>
+            </div>`;
+        });
+        document.getElementById("produkGrid").innerHTML = html;
+    }
+    loadProduk();
+</script>
