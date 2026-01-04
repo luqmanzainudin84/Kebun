@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Pengurusan Produk Pertanian</title>
+    <title>Admin - Pengurusan Produk</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: white; }
-        .admin-card { background: #1e293b; border-radius: 30px; border: 1px solid #334155; }
+        .admin-card { background: #1e293b; border-radius: 30px; border: 1px solid #334155; cursor: pointer; transition: all 0.2s; }
+        .admin-card:active { transform: scale(0.98); background: #334155; }
         .status-badge { font-size: 9px; font-weight: 900; text-transform: uppercase; border-radius: 12px; padding: 8px; text-align: center; border: 2px solid; }
     </style>
 </head>
@@ -19,121 +20,150 @@
         <h1 class="text-3xl font-black text-center text-green-400 uppercase tracking-tighter">Panel Kawalan Admin</h1>
 
         <section>
-            <p class="text-[10px] font-bold text-slate-500 uppercase mb-4 tracking-widest px-2">Stok Produk Semasa</p>
-            <div id="adminProdukContainer" class="space-y-3"></div>
+            <p class="text-[10px] font-bold text-slate-500 uppercase mb-4 tracking-widest px-2 text-center">Klik Produk Untuk Edit / Klik X Untuk Padam</p>
+            <div id="adminProdukContainer" class="space-y-3">
+                </div>
         </section>
 
         <section>
             <p class="text-[10px] font-bold text-orange-500 uppercase mb-4 tracking-widest text-center">Pengurusan Pesanan Pelanggan</p>
-            <div id="adminPesananContainer" class="space-y-4"></div>
+            <div id="adminPesananContainer" class="space-y-4">
+                </div>
         </section>
     </div>
 
     <script>
+        // GANTI URL INI DENGAN URL WEB APP ANDA
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
 
         async function muatAdminData() {
             try {
+                // 1. Ambil Produk
                 const resP = await fetch(API + "?action=getProduk");
                 const produk = await resP.json();
+                
                 document.getElementById('adminProdukContainer').innerHTML = produk.map(p => `
-                    <div class="admin-card p-6 relative border-l-4 border-green-500 transition-all">
-                        <button onclick="padamProduk('${p.NamaBarang}')" class="absolute top-4 right-4 bg-red-500/10 text-red-500 border border-red-500/30 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all z-10">✕</button>
+                    <div class="admin-card p-6 relative border-l-4 border-green-500" 
+                         onclick="bukaEditProduk('${p.NamaBarang}', '${p.Hargakg}', '${p.Stok}', '${p.Lokasi}', '${p.Coords}')">
+                        
+                        <button onclick="event.stopPropagation(); padamProduk('${p.NamaBarang}')" 
+                                class="absolute top-4 right-4 bg-red-500/20 text-red-500 border border-red-500/30 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white z-20">
+                            ✕
+                        </button>
+                        
                         <div class="pr-12">
                             <h3 class="font-black text-xl uppercase text-white leading-none mb-1">${p.NamaBarang}</h3>
-                            <p class="text-[10px] text-slate-400 uppercase mb-3">📍 ${p.Lokasi || 'Tiada Lokasi'}</p>
+                            <p class="text-[10px] text-slate-400 uppercase mb-3 italic">📍 ${p.Lokasi || 'Tiada Lokasi'}</p>
                             <div class="flex items-end gap-2">
                                 <span class="text-green-400 font-black text-3xl">${p.Stok}kg</span>
-                                <span class="text-slate-500 text-xs font-bold mb-1 italic">/ RM${p.Hargakg}</span>
+                                <span class="text-slate-500 text-xs font-bold mb-1">/ RM${p.Hargakg}</span>
                             </div>
                         </div>
-                    </div>`).join('');
+                    </div>
+                `).join('');
 
+                // 2. Ambil Pesanan
                 const resO = await fetch(API + "?action=getPesanan");
                 const pesanan = await resO.json();
+                
                 document.getElementById('adminPesananContainer').innerHTML = pesanan.reverse().map(o => {
                     const tarikh = o.Timestamp ? new Date(o.Timestamp).toLocaleDateString('ms-MY', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Baru';
+                    
                     return `
-                    <div class="bg-white text-slate-800 p-6 rounded-[35px] shadow-2xl relative mb-4">
-                        <button onclick="padamPesanan('${o.NamaPembeli}', '${o.NamaBarang}')" class="absolute top-4 right-4 text-red-400 hover:text-red-600 p-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="bg-white text-slate-800 p-6 rounded-[35px] shadow-2xl relative">
+                        <button onclick="padamPesanan('${o.NamaPembeli}', '${o.NamaBarang}')" class="absolute top-4 right-4 text-red-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                         </button>
 
-                        <div class="flex justify-between items-start border-b border-slate-100 pb-3 mb-3 pr-8">
-                            <div>
-                                <h3 class="font-black text-blue-600 uppercase text-lg leading-none">${o.NamaPembeli || 'TIADA NAMA'}</h3>
-                                <p class="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-wider">${tarikh}</p>
-                            </div>
+                        <div class="border-b border-slate-100 pb-3 mb-3 pr-10">
+                            <h3 class="font-black text-blue-600 uppercase text-lg leading-none">${o.NamaPembeli || 'TANPA NAMA'}</h3>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-wider">${tarikh}</p>
                         </div>
                         
-                        <div class="bg-green-50 p-3 rounded-2xl mb-4 border border-green-100">
-                             <p class="text-[11px] font-black text-green-700 uppercase">${o.NamaBarang} — ${o.Beratkg}kg</p>
+                        <div class="bg-green-50 p-3 rounded-2xl mb-4 text-center border border-green-100">
+                             <p class="text-[11px] font-black text-green-700 uppercase">${o.NamaBarang} — ${o.Beratkg}KG</p>
                         </div>
 
-                        <div class="flex justify-between items-center my-4">
+                        <div class="flex justify-between items-center mb-4">
                             <p class="text-xs font-bold text-slate-400 uppercase">Total: <span class="text-2xl font-black text-slate-900 ml-1">RM${o.TotalHarga}</span></p>
                             <div class="flex gap-2">
-                                <a href="tel:${o.NoPhone}" class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all">📞</a>
-                                <a href="https://wa.me/${o.NoPhone}" class="bg-green-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all">💬</a>
+                                <a href="tel:${o.NoPhone}" class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg">📞</a>
+                                <a href="https://wa.me/${o.NoPhone}" class="bg-green-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg">💬</a>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="status-badge ${o.StatusBayar === 'SUDAH' ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-slate-100 text-slate-300'}">
+                            <div class="status-badge ${o.StatusBayar === 'SUDAH' ? 'bg-green-500 text-white border-green-500' : 'bg-white text-slate-300 border-slate-100'}">
                                 💵 BAYAR: ${o.StatusBayar || 'BELUM'}
                             </div>
-                            <div class="status-badge ${o.StatusAmbil === 'SUDAH' ? 'bg-orange-500 border-orange-500 text-white' : 'bg-white border-slate-100 text-slate-300'}">
+                            <div class="status-badge ${o.StatusAmbil === 'SUDAH' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-slate-300 border-slate-100'}">
                                 📦 AMBIL: ${o.StatusAmbil || 'BELUM'}
                             </div>
                         </div>
                     </div>`;
                 }).join('');
-            } catch (e) { console.error("Ralat:", e); }
+
+            } catch (e) { console.error(e); }
         }
 
-        async function padamPesanan(nama, barang) {
-            const result = await Swal.fire({
-                title: 'Padam Pesanan?',
-                text: "Pesanan " + nama + " untuk " + barang + " akan dibuang.",
-                icon: 'warning',
+        // FUNGSI EDIT PRODUK
+        async function bukaEditProduk(nama, harga, stok, lokasi, coords) {
+            const { value: formValues } = await Swal.fire({
+                title: 'EDIT DATA PRODUK',
+                background: '#1e293b',
+                color: '#fff',
+                html:
+                    `<label class="text-xs text-slate-400 uppercase">Nama Produk</label>` +
+                    `<input id="swal-nama" class="swal2-input !mt-1" style="color:black" value="${nama}">` +
+                    `<label class="text-xs text-slate-400 uppercase">Harga Per KG</label>` +
+                    `<input id="swal-harga" type="number" class="swal2-input !mt-1" style="color:black" value="${harga}">` +
+                    `<label class="text-xs text-slate-400 uppercase">Stok Semasa</label>` +
+                    `<input id="swal-stok" type="number" class="swal2-input !mt-1" style="color:black" value="${stok}">` +
+                    `<label class="text-xs text-slate-400 uppercase">Lokasi (Teks)</label>` +
+                    `<input id="swal-lokasi" class="swal2-input !mt-1" style="color:black" value="${lokasi}">` +
+                    `<label class="text-xs text-slate-400 uppercase">Koordinat (Pin)</label>` +
+                    `<input id="swal-coords" class="swal2-input !mt-1" style="color:black" value="${coords}">`,
                 showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'Ya, Padam'
+                confirmButtonText: 'Kemaskini',
+                confirmButtonColor: '#22c55e',
+                preConfirm: () => {
+                    return {
+                        action: 'kemaskiniProduk',
+                        namaLama: nama,
+                        namaBaru: document.getElementById('swal-nama').value,
+                        harga: document.getElementById('swal-harga').value,
+                        stok: document.getElementById('swal-stok').value,
+                        lokasi: document.getElementById('swal-lokasi').value,
+                        coords: document.getElementById('swal-coords').value
+                    }
+                }
             });
 
-            if (result.isConfirmed) {
-                const resp = await fetch(API, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'padamPesanan', namaPembeli: nama, namaBarang: barang })
-                });
-                if (await resp.text() === "ORDER_DELETED") {
-                    Swal.fire('Dipadam!', 'Pesanan telah dikeluarkan.', 'success');
+            if (formValues) {
+                Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading() });
+                const resp = await fetch(API, { method: 'POST', body: JSON.stringify(formValues) });
+                if (await resp.text() === "UPDATED") {
+                    Swal.fire('Berjaya', 'Data telah dikemaskini', 'success');
                     muatAdminData();
                 }
             }
         }
 
         async function padamProduk(nama) {
-            const result = await Swal.fire({
-                title: 'Padam Produk?',
-                text: "Data produk " + nama + " akan dibuang terus.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                confirmButtonText: 'Ya, Padam'
-            });
+            const res = await Swal.fire({ title: 'Padam ' + nama + '?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Ya' });
+            if (res.isConfirmed) {
+                const resp = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'padamProduk', namaBarang: nama }) });
+                if (await resp.text() === "DELETED") { muatAdminData(); }
+            }
+        }
 
-            if (result.isConfirmed) {
-                const resp = await fetch(API, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'padamProduk', namaBarang: nama })
-                });
-                if (await resp.text() === "DELETED") {
-                    Swal.fire('Berjaya', 'Produk dipadam.', 'success');
-                    muatAdminData();
-                }
+        async function padamPesanan(nama, barang) {
+            const res = await Swal.fire({ title: 'Padam Pesanan?', text: nama + ' - ' + barang, icon: 'warning', showCancelButton: true });
+            if (res.isConfirmed) {
+                const resp = await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'padamPesanan', namaPembeli: nama, namaBarang: barang }) });
+                if (await resp.text() === "ORDER_DELETED") { muatAdminData(); }
             }
         }
 
