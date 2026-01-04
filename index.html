@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Koperasi Agrotek Perak</title>
+    <title>Koperasi Perak</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -11,20 +11,22 @@
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
         .card-shadow { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* Pastikan pautan boleh ditekan dengan jelas */
+        .btn-lokasi { pointer-events: auto !important; cursor: pointer !important; z-index: 50; }
     </style>
 </head>
 <body class="pb-10">
 
     <div class="bg-[#15803d] text-white pt-10 pb-16 px-6 rounded-b-[50px] shadow-lg text-center">
-        <h1 class="text-3xl font-black tracking-tighter uppercase">Agrotek Perak</h1>
-        <p class="text-green-100 text-xs font-bold opacity-80 mt-1">Segar Dari Ladang Ke Meja Anda</p>
+        <h1 class="text-3xl font-black tracking-tighter uppercase leading-none">KOPERASI PERAK</h1>
+        <p class="text-green-100 text-xs font-bold opacity-80 mt-2 uppercase tracking-widest">Segar Dari Ladang</p>
     </div>
 
     <div class="max-w-md mx-auto px-4 -mt-10 space-y-6">
         
         <div id="produkContainer" class="space-y-4">
             <div class="bg-white p-8 rounded-[30px] text-center shadow-sm">
-                <p class="text-slate-400 font-bold animate-pulse text-sm">Memuatkan produk terkini...</p>
+                <p class="text-slate-400 font-bold animate-pulse text-sm">Memuatkan produk...</p>
             </div>
         </div>
 
@@ -34,12 +36,12 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Nama Anda</label>
-                    <input type="text" id="uNama" placeholder="Cth: Ahmad" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold">
+                    <input type="text" id="uNama" placeholder="Cth: Ahmad" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold transition-all">
                 </div>
                 
                 <div>
                     <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">No. WhatsApp</label>
-                    <input type="number" id="uFon" placeholder="60123456789" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold">
+                    <input type="number" id="uFon" placeholder="60123456789" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold transition-all">
                 </div>
                 
                 <div>
@@ -51,7 +53,7 @@
 
                 <div>
                     <label class="text-[10px] font-black text-slate-400 ml-2 uppercase">Berat (KG)</label>
-                    <input type="number" step="0.01" id="uBerat" placeholder="Cth: 0.4 atau 1.5" oninput="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-lg">
+                    <input type="number" step="0.01" id="uBerat" placeholder="Cth: 0.4" oninput="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-lg">
                 </div>
 
                 <div class="bg-green-600 rounded-2xl p-5 text-center shadow-lg shadow-green-200">
@@ -81,24 +83,28 @@
                 const select = document.getElementById('uBarang');
                 
                 container.innerHTML = dataProduk.map(p => {
-                    // Logik untuk bina link Google Maps
-                    const mapsUrl = p.Coords ? `https://www.google.com/maps?q=${p.Coords}` : "#";
+                    // Penambahbaikan link Google Maps
+                    let mapsUrl = "#";
+                    if(p.Coords) {
+                        // Bersihkan sebarang simbol pelik jika ada
+                        let koordinat = p.Coords.toString().trim();
+                        mapsUrl = "https://www.google.com/maps?q=" + koordinat;
+                    }
                     
                     return `
-                    <div class="bg-white p-6 rounded-[35px] card-shadow border-l-[8px] border-green-500 flex justify-between items-center transition-transform active:scale-95">
-                        <div>
+                    <div class="bg-white p-6 rounded-[35px] card-shadow border-l-[8px] border-green-500 flex justify-between items-center relative">
+                        <div class="flex-1">
                             <h3 class="font-black text-slate-800 uppercase text-lg leading-none mb-1">${p.NamaBarang}</h3>
                             <p class="text-green-600 font-black text-sm">RM ${p.Hargakg}/kg</p>
-                            <p class="text-[9px] font-bold text-slate-400 uppercase mt-2 tracking-tighter italic">📍 ${p.LokasiNamaLinkMaps}</p>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase mt-2 tracking-tighter">📍 ${p.LokasiNamaLinkMaps}</p>
                         </div>
-                        <div class="text-right">
-                            <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Stok: ${p.Stok}kg</span>
-                            <div class="mt-3">
-                                ${p.Coords ? 
-                                    `<a href="${mapsUrl}" target="_blank" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-md shadow-blue-100 inline-block">Lokasi Pin</a>` : 
-                                    `<span class="text-[8px] text-slate-300 font-bold uppercase italic">Tiada Pin</span>`
-                                }
-                            </div>
+                        <div class="text-right flex flex-col items-end">
+                            <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase mb-3">Stok: ${p.Stok}kg</span>
+                            
+                            ${p.Coords ? 
+                                `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="btn-lokasi bg-blue-600 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-md active:bg-blue-800 block">Lokasi Pin</a>` : 
+                                `<span class="text-[8px] text-slate-300 font-bold uppercase italic">Tiada Pin</span>`
+                            }
                         </div>
                     </div>`;
                 }).join('');
@@ -110,7 +116,7 @@
                 const dataO = await resO.json();
                 document.getElementById('logPesanan').innerHTML = dataO.slice(-3).reverse().map(o => `
                     <div class="bg-white/50 py-3 px-6 rounded-full inline-block text-[10px] font-bold text-slate-500 border border-white mb-2 shadow-sm">
-                        <span class="text-blue-600">${o.NamaPembeli}</span> menempah ${o.NamaBarang} (${o.Beratkg}kg)
+                        <span class="text-blue-600">${o.NamaPembeli}</span> menempah ${o.NamaBarang}
                     </div>
                 `).join('');
 
@@ -132,7 +138,7 @@
             const berat = document.getElementById('uBerat').value;
             const total = document.getElementById('uTotal').innerText.replace('RM ', '');
 
-            if (!nama || !fon || !barang || !berat || berat <= 0) return Swal.fire('Ops!', 'Lengkapkan borang dengan berat yang betul', 'warning');
+            if (!nama || !fon || !barang || !berat || berat <= 0) return Swal.fire('Ops!', 'Lengkapkan borang dengan betul', 'warning');
 
             btn.disabled = true;
             btn.innerText = "Memproses...";
