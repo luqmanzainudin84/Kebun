@@ -2,62 +2,41 @@
 <html>
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Agrotek</title>
+    <title>Admin Agrotek Perak</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-slate-900 text-white p-4">
     <div class="max-w-4xl mx-auto space-y-6">
         <div class="bg-white text-slate-800 p-6 rounded-[30px] shadow-xl">
-            <h2 class="font-black text-green-700 mb-4 uppercase">📍 Pengurusan Stok & Lokasi Pin</h2>
-            <div id="map" class="h-48 rounded-2xl mb-4 border-2 border-slate-200"></div>
+            <h2 class="font-black text-green-700 mb-4 uppercase">KEMASKINI STOK & LOKASI</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input type="text" id="aBarang" placeholder="Nama Barang" class="p-3 bg-slate-100 rounded-xl outline-none font-bold">
-                <input type="text" id="aLokasi" placeholder="Nama Tempat" class="p-3 bg-slate-100 rounded-xl outline-none font-bold">
+                <input type="text" id="aLokasi" placeholder="Lokasi (Nama & Link)" class="p-3 bg-slate-100 rounded-xl outline-none font-bold">
                 <input type="number" id="aHarga" placeholder="Harga/kg" class="p-3 bg-slate-100 rounded-xl outline-none font-bold">
-                <input type="number" id="aStok" placeholder="Set Stok Baru (kg)" class="p-3 bg-slate-100 rounded-xl outline-none font-bold">
-                <input type="hidden" id="aCoords">
+                <input type="number" id="aStok" placeholder="Jumlah Stok" class="p-3 bg-slate-100 rounded-xl outline-none font-bold">
             </div>
-            <button onclick="simpanStok()" id="btnS" class="w-full mt-4 bg-green-600 text-white py-4 rounded-xl font-black">SIMPAN DATA</button>
+            <button onclick="simpanStok()" class="w-full mt-4 bg-green-600 text-white py-4 rounded-xl font-black">SIMPAN DATA</button>
         </div>
 
-        <h3 class="font-bold text-sm uppercase opacity-50">Senarai Produk & Baki Stok</h3>
-        <div id="stokList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-
-        <h3 class="font-bold text-sm uppercase opacity-50">Senarai Pesanan Masuk</h3>
+        <h3 class="font-bold text-sm uppercase opacity-50 px-2 text-green-400">STATUS PESANAN PEMBELI</h3>
         <div id="pesananList" class="space-y-3"></div>
     </div>
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
-        var map = L.map('map').setView([4.5921, 101.0901], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        var marker = L.marker([4.5921, 101.0901], {draggable: true}).addTo(map);
-        map.on('click', e => { marker.setLatLng(e.latlng); document.getElementById('aCoords').value = e.latlng.lat + "," + e.latlng.lng; });
 
         async function muatAdmin() {
-            // Muat Stok
-            const rP = await fetch(API + "?action=getProduk");
-            const dP = await rP.json();
-            document.getElementById('stokList').innerHTML = dP.map(i => `
-                <div class="bg-slate-800 p-4 rounded-2xl border-l-4 border-green-500 flex justify-between">
-                    <div><p class="font-black uppercase">${i.NamaBarang}</p><p class="text-[10px] text-slate-400 italic">${i.Lokasi}</p></div>
-                    <div class="text-right"><p class="text-xs opacity-50">BAKI</p><p class="text-xl font-black">${i.Stok}kg</p></div>
-                </div>`).join('');
-
-            // Muat Pesanan
-            const rO = await fetch(API + "?action=getPesanan");
-            const dO = await rO.json();
-            document.getElementById('pesananList').innerHTML = dO.reverse().map(i => `
-                <div class="bg-white text-slate-800 p-4 rounded-2xl shadow-md">
-                    <div class="flex justify-between font-black border-b pb-2 mb-2 uppercase text-xs">
-                        <span>${i.NamaPembeli}</span><span class="text-green-600">${i.NamaBarang} (${i.Berat(kg)}kg)</span>
+            const res = await fetch(API + "?action=getPesanan");
+            const data = await res.json();
+            document.getElementById('pesananList').innerHTML = data.reverse().map(i => `
+                <div class="bg-white text-slate-800 p-5 rounded-2xl shadow-lg">
+                    <div class="flex justify-between font-black border-b pb-2 mb-3 uppercase text-xs">
+                        <span>${i.NamaPembeli}</span><span class="text-green-600">${i.NamaBarang} (${i.Beratkg}kg)</span>
                     </div>
-                    <div class="flex gap-2 mb-3">
-                        <a href="tel:${i.No.Telefon}" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-[10px] font-bold">CALL</a>
-                        <a href="https://wa.me/${i.No.Telefon}" class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-[10px] font-bold">WHATSAPP</a>
+                    <div class="flex gap-2 mb-4">
+                        <a href="tel:${i.NoTelefon}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-[10px] font-bold">CALL</a>
+                        <a href="https://wa.me/${i.NoTelefon}" class="bg-green-600 text-white px-4 py-2 rounded-lg text-[10px] font-bold">WHATSAPP</a>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="updateStatus(${i.rowIndex}, 'bayar')" class="py-2 rounded-lg text-[10px] font-bold ${i.StatusBayar == 'Sudah' ? 'bg-green-600 text-white' : 'bg-slate-200'}">BAYAR: ${i.StatusBayar}</button>
@@ -67,9 +46,9 @@
         }
 
         async function simpanStok() {
-            const data = { action: 'kemaskiniStok', namaBarang: document.getElementById('aBarang').value, harga: document.getElementById('aHarga').value, stok: document.getElementById('aStok').value, lokasi: document.getElementById('aLokasi').value, coords: document.getElementById('aCoords').value };
+            const data = { action: 'kemaskiniStok', namaBarang: document.getElementById('aBarang').value, harga: document.getElementById('aHarga').value, stok: document.getElementById('aStok').value, lokasi: document.getElementById('aLokasi').value };
             await fetch(API, { method: 'POST', body: JSON.stringify(data) });
-            Swal.fire('Berjaya!', 'Data disimpan', 'success').then(() => muatAdmin());
+            Swal.fire('Berjaya!', 'Data Stok dikemaskini.', 'success').then(() => location.reload());
         }
 
         async function updateStatus(idx, type) {
