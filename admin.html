@@ -20,34 +20,25 @@
 
         <section>
             <p class="text-[10px] font-bold text-slate-500 uppercase mb-4 tracking-widest px-2">Stok Produk Semasa</p>
-            <div id="adminProdukContainer" class="space-y-3">
-                </div>
+            <div id="adminProdukContainer" class="space-y-3"></div>
         </section>
 
         <section>
             <p class="text-[10px] font-bold text-orange-500 uppercase mb-4 tracking-widest text-center">Pengurusan Pesanan Pelanggan</p>
-            <div id="adminPesananContainer" class="space-y-4">
-                </div>
+            <div id="adminPesananContainer" class="space-y-4"></div>
         </section>
     </div>
 
     <script>
-        // GANTI URL INI DENGAN URL WEB APP ANDA SELEPAS DEPLOY CODE.GS
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
 
         async function muatAdminData() {
             try {
-                // 1. Ambil & Papar Produk
                 const resP = await fetch(API + "?action=getProduk");
                 const produk = await resP.json();
-                
                 document.getElementById('adminProdukContainer').innerHTML = produk.map(p => `
                     <div class="admin-card p-6 relative border-l-4 border-green-500 transition-all">
-                        <button onclick="padamProduk('${p.NamaBarang}')" 
-                                class="absolute top-4 right-4 bg-red-500/10 text-red-500 border border-red-500/30 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all z-10">
-                            ✕
-                        </button>
-                        
+                        <button onclick="padamProduk('${p.NamaBarang}')" class="absolute top-4 right-4 bg-red-500/10 text-red-500 border border-red-500/30 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all z-10">✕</button>
                         <div class="pr-12">
                             <h3 class="font-black text-xl uppercase text-white leading-none mb-1">${p.NamaBarang}</h3>
                             <p class="text-[10px] text-slate-400 uppercase mb-3">📍 ${p.Lokasi || 'Tiada Lokasi'}</p>
@@ -56,34 +47,36 @@
                                 <span class="text-slate-500 text-xs font-bold mb-1 italic">/ RM${p.Hargakg}</span>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    </div>`).join('');
 
-                // 2. Ambil & Papar Pesanan (Mapping ikut Kolum B: Nama Pembeli)
                 const resO = await fetch(API + "?action=getPesanan");
                 const pesanan = await resO.json();
-                
                 document.getElementById('adminPesananContainer').innerHTML = pesanan.reverse().map(o => {
-                    // Format tarikh agar lebih kemas
                     const tarikh = o.Timestamp ? new Date(o.Timestamp).toLocaleDateString('ms-MY', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}) : 'Baru';
-                    
                     return `
-                    <div class="bg-white text-slate-800 p-6 rounded-[35px] shadow-2xl relative">
-                        <div class="flex justify-between items-start border-b border-slate-100 pb-3 mb-3">
+                    <div class="bg-white text-slate-800 p-6 rounded-[35px] shadow-2xl relative mb-4">
+                        <button onclick="padamPesanan('${o.NamaPembeli}', '${o.NamaBarang}')" class="absolute top-4 right-4 text-red-400 hover:text-red-600 p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+
+                        <div class="flex justify-between items-start border-b border-slate-100 pb-3 mb-3 pr-8">
                             <div>
                                 <h3 class="font-black text-blue-600 uppercase text-lg leading-none">${o.NamaPembeli || 'TIADA NAMA'}</h3>
                                 <p class="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-wider">${tarikh}</p>
                             </div>
-                            <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-black border border-green-200">
-                                ${o.NamaBarang} (${o.Beratkg}kg)
-                            </span>
                         </div>
                         
+                        <div class="bg-green-50 p-3 rounded-2xl mb-4 border border-green-100">
+                             <p class="text-[11px] font-black text-green-700 uppercase">${o.NamaBarang} — ${o.Beratkg}kg</p>
+                        </div>
+
                         <div class="flex justify-between items-center my-4">
                             <p class="text-xs font-bold text-slate-400 uppercase">Total: <span class="text-2xl font-black text-slate-900 ml-1">RM${o.TotalHarga}</span></p>
                             <div class="flex gap-2">
-                                <a href="tel:${o.NoPhone}" class="bg-blue-100 text-blue-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm active:scale-90 transition-all">📞</a>
-                                <a href="https://wa.me/${o.NoPhone}" class="bg-green-100 text-green-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm active:scale-90 transition-all">💬</a>
+                                <a href="tel:${o.NoPhone}" class="bg-blue-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all">📞</a>
+                                <a href="https://wa.me/${o.NoPhone}" class="bg-green-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-all">💬</a>
                             </div>
                         </div>
 
@@ -97,43 +90,53 @@
                         </div>
                     </div>`;
                 }).join('');
+            } catch (e) { console.error("Ralat:", e); }
+        }
 
-            } catch (e) { 
-                console.error("Gagal muat data admin:", e);
-                Swal.fire('Ralat', 'Tidak dapat menyambung ke pangkalan data.', 'error');
+        async function padamPesanan(nama, barang) {
+            const result = await Swal.fire({
+                title: 'Padam Pesanan?',
+                text: "Pesanan " + nama + " untuk " + barang + " akan dibuang.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Ya, Padam'
+            });
+
+            if (result.isConfirmed) {
+                const resp = await fetch(API, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'padamPesanan', namaPembeli: nama, namaBarang: barang })
+                });
+                if (await resp.text() === "ORDER_DELETED") {
+                    Swal.fire('Dipadam!', 'Pesanan telah dikeluarkan.', 'success');
+                    muatAdminData();
+                }
             }
         }
 
         async function padamProduk(nama) {
             const result = await Swal.fire({
-                title: 'Padam ' + nama + '?',
-                text: "Data produk ini akan dikeluarkan terus dari sistem!",
+                title: 'Padam Produk?',
+                text: "Data produk " + nama + " akan dibuang terus.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#334155',
-                confirmButtonText: 'Ya, Padam',
-                cancelButtonText: 'Batal'
+                confirmButtonText: 'Ya, Padam'
             });
 
             if (result.isConfirmed) {
-                try {
-                    const resp = await fetch(API, {
-                        method: 'POST',
-                        body: JSON.stringify({ action: 'padamProduk', namaBarang: nama })
-                    });
-                    const resText = await resp.text();
-                    if (resText === "DELETED") {
-                        Swal.fire('Berjaya', 'Produk telah dipadam.', 'success');
-                        muatAdminData();
-                    }
-                } catch (e) {
-                    Swal.fire('Ralat', 'Gagal memproses permintaan.', 'error');
+                const resp = await fetch(API, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'padamProduk', namaBarang: nama })
+                });
+                if (await resp.text() === "DELETED") {
+                    Swal.fire('Berjaya', 'Produk dipadam.', 'success');
+                    muatAdminData();
                 }
             }
         }
 
-        // Panggil data semasa halaman dibuka
         muatAdminData();
     </script>
 </body>
