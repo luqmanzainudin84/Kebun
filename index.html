@@ -2,181 +2,161 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jualan Produk Pertanian</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koperasi Perak - Borang Pesanan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .btn-lokasi { transition: all 0.2s; cursor: pointer; border: 1.5px solid #dbeafe; }
-        .btn-lokasi:active { transform: scale(0.95); background-color: #dbeafe; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
+        .hero-gradient { background: linear-gradient(180deg, #15803d 0%, #166534 100%); border-radius: 0 0 60px 60px; }
+        .card-shadow { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
+        .input-box { background: #f8fafc; border: 2px solid #f1f5f9; border-radius: 20px; transition: all 0.3s; }
+        .input-box:focus-within { border-color: #22c55e; background: white; }
     </style>
 </head>
 <body class="pb-10">
 
-    <div class="bg-[#15803d] text-white pt-12 pb-20 px-6 rounded-b-[60px] shadow-lg text-center">
-        <h1 class="text-3xl font-black tracking-tighter uppercase leading-none">PRODUK PERTANIAN</h1>
-        <p class="text-green-100 text-[10px] font-bold opacity-80 mt-2 uppercase tracking-[0.2em]">Segar Terus Dari Ladang</p>
+    <div class="hero-gradient pt-12 pb-20 px-6 text-center text-white relative">
+        <h1 class="text-4xl font-black tracking-tighter uppercase mb-2">Koperasi Perak</h1>
+        <p class="text-xs font-bold opacity-80 uppercase tracking-widest">Segar dari ladang ke meja anda</p>
     </div>
 
     <div class="max-w-md mx-auto px-4 -mt-12 space-y-6">
         
-        <div id="produkContainer" class="space-y-4">
-            <div class="bg-white p-8 rounded-[35px] text-center shadow-sm border border-slate-100">
-                <p class="text-slate-400 font-bold animate-pulse text-sm">Memuatkan stok terbaru...</p>
+        <div id="produkDisplay" class="space-y-4">
+            <div class="bg-white p-8 rounded-[40px] animate-pulse text-center text-slate-300 font-bold uppercase text-xs">
+                Memuatkan Produk...
             </div>
         </div>
 
-        <div class="bg-white rounded-[40px] p-8 card-shadow border border-green-50">
-            <h2 class="text-[#15803d] font-black uppercase tracking-widest text-center mb-8 border-b border-slate-50 pb-4">Borang Pesanan</h2>
+        <div class="bg-white rounded-[45px] p-8 card-shadow border border-slate-50">
+            <h2 class="text-2xl font-black text-green-800 text-center uppercase tracking-tight mb-8">Borang Pesanan</h2>
             
-            <div class="space-y-5">
+            <div class="space-y-6">
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Nama Anda</label>
-                    <input type="text" id="uNama" placeholder="Nama penuh / gelaran" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold text-slate-700">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Nama Anda</label>
+                    <div class="input-box p-4 mt-1">
+                        <input type="text" id="custNama" placeholder="Cth: Ahmad" class="w-full bg-transparent outline-none font-bold text-slate-700">
+                    </div>
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">No. WhatsApp</label>
-                    <input type="number" id="uFon" placeholder="Contoh: 60123456789" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-bold text-slate-700">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">No. WhatsApp</label>
+                    <div class="input-box p-4 mt-1">
+                        <input type="number" id="custFon" placeholder="Contoh: 60123456789" class="w-full bg-transparent outline-none font-bold text-slate-700">
+                    </div>
                 </div>
-                
+
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Pilihan Barang</label>
-                    <select id="uBarang" onchange="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-slate-700 appearance-none">
-                        <option value="">-- Sila Pilih --</option>
-                    </select>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Pilihan Barang</label>
+                    <div class="input-box p-4 mt-1">
+                        <select id="pilihBarang" onchange="updateHarga()" class="w-full bg-transparent outline-none font-bold text-slate-700 appearance-none">
+                            <option value="">-- Sila Pilih --</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="relative">
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Kuantiti / Berat</label>
-                    <input type="number" step="0.01" id="uBerat" placeholder="Masukkan jumlah berat" oninput="updateHarga()" class="w-full p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 outline-none focus:border-green-500 font-black text-lg text-slate-700">
-                    <span class="absolute right-5 bottom-4 text-slate-300 font-black">KG</span>
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Kuantiti / Berat</label>
+                    <div class="input-box p-4 mt-1 flex items-center">
+                        <input type="number" id="berat" oninput="kiraTotal()" placeholder="Jumlah berat" class="w-full bg-transparent outline-none font-bold text-slate-700 pr-2">
+                        <span class="font-black text-slate-300">KG</span>
+                    </div>
                 </div>
 
-                <div class="bg-green-600 rounded-3xl p-6 text-center shadow-xl shadow-green-100 border-b-4 border-green-800">
-                    <p class="text-green-100 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Jumlah Perlu Bayar</p>
-                    <h3 id="uTotal" class="text-white text-4xl font-black tracking-tighter">RM 0.00</h3>
+                <div class="bg-green-600 rounded-[30px] p-6 text-white text-center shadow-xl shadow-green-200 transition-all">
+                    <p class="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">Jumlah Perlu Bayar</p>
+                    <div class="text-4xl font-black tracking-tighter">RM <span id="totalHarga">0.00</span></div>
                 </div>
 
-                <button onclick="hantarPesanan()" id="btnHantar" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-black active:scale-95 transition-all shadow-xl mt-2">
+                <button onclick="hantarPesanan()" class="w-full bg-slate-900 text-white p-6 rounded-[30px] font-black uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-xl">
                     Hantar Pesanan
                 </button>
             </div>
-        </div>
-
-        <div class="text-center space-y-4 pb-10 pt-4">
-            <div class="flex items-center justify-center gap-2">
-                <span class="h-[1px] w-8 bg-slate-200"></span>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Tempahan Terkini</p>
-                <span class="h-[1px] w-8 bg-slate-200"></span>
-            </div>
-            <div id="logPesanan" class="flex flex-col items-center gap-3">
-                </div>
         </div>
     </div>
 
     <script>
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
+        let senaraiProduk = [];
 
         async function muatData() {
             try {
-                const resP = await fetch(API + "?action=getProduk");
-                const dataProduk = await resP.json();
+                const res = await fetch(API + "?action=getProduk");
+                senaraiProduk = await res.json();
                 
-                const container = document.getElementById('produkContainer');
-                const select = document.getElementById('uBarang');
-                
-                container.innerHTML = dataProduk.map(p => {
-                    const mapsUrl = p.Coords ? `https://www.google.com/maps/search/?api=1&query=${p.Coords}` : "#";
-                    return `
-                    <div class="bg-white p-6 rounded-[35px] card-shadow border-l-[10px] border-green-600 relative overflow-hidden flex flex-col gap-4">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <h3 class="font-black text-slate-800 uppercase text-2xl leading-tight mb-1">${p.NamaBarang}</h3>
-                                <div class="flex items-baseline gap-1">
-                                    <span class="text-green-600 font-black text-xl">RM ${p.Hargakg}</span>
-                                    <span class="text-slate-400 text-[10px] font-black italic">/ KG</span>
+                // Update Card Produk
+                document.getElementById('produkDisplay').innerHTML = senaraiProduk.map(p => `
+                    <div class="bg-white p-6 rounded-[40px] card-shadow border-l-[12px] border-green-500 flex flex-col relative overflow-hidden">
+                        <div class="relative z-10">
+                            <h3 class="text-3xl font-black text-slate-800 uppercase leading-none mb-2">${p.NamaBarang}</h3>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-green-600 font-black text-xl">RM ${p.Hargakg}/kg</span>
+                                <div class="bg-blue-50 px-3 py-1 rounded-full flex items-center gap-1" onclick="window.open('https://www.google.com/maps?q=${p.Coords}')">
+                                    <span class="text-[9px] font-black text-blue-600 uppercase">📍 Lokasi Pin</span>
+                                </div>
+                                <div class="bg-green-50 px-3 py-1 rounded-full">
+                                    <span class="text-[9px] font-black text-green-600 uppercase">Stok: ${p.Stok}kg</span>
                                 </div>
                             </div>
-                            <div class="bg-green-50 text-green-700 px-3 py-1.5 rounded-2xl border border-green-100 text-right">
-                                <p class="text-[8px] font-black uppercase opacity-60 leading-none">Baki Stok</p>
-                                <p class="text-sm font-black leading-none mt-1">${p.Stok}KG</p>
-                            </div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1">
+                                <span class="text-red-500">📍</span> ${p.Lokasi}
+                            </p>
                         </div>
+                    </div>
+                `).join('');
 
-                        <div class="flex flex-col gap-3 pt-2 border-t border-slate-50">
-                            ${p.Coords ? `
-                            <a href="${mapsUrl}" target="_blank" class="btn-lokasi flex items-center justify-center gap-3 bg-blue-50 text-blue-700 px-4 py-3 rounded-2xl w-full sm:w-fit shadow-sm">
-                                <span class="text-lg leading-none">📍</span>
-                                <span class="text-[11px] font-black uppercase tracking-wider text-black">Lokasi Pin</span>
-                            </a>` : ''}
-                            
-                            <div class="flex items-center gap-2 px-1">
-                                <span class="text-slate-300 text-xs">🏠</span>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">${p.Lokasi || 'Lokasi Tidak Dinyatakan'}</span>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('');
+                // Update Dropdown
+                const select = document.getElementById('pilihBarang');
+                senaraiProduk.forEach(p => {
+                    let opt = document.createElement('option');
+                    opt.value = p.NamaBarang;
+                    opt.text = p.NamaBarang.toUpperCase();
+                    select.add(opt);
+                });
 
-                select.innerHTML = '<option value="">-- Sila Pilih --</option>' + 
-                    dataProduk.map(p => `<option value="${p.NamaBarang}" data-harga="${p.Hargakg}">${p.NamaBarang}</option>`).join('');
-
-                const resO = await fetch(API + "?action=getPesanan");
-                const dataO = await resO.json();
-                const logContainer = document.getElementById('logPesanan');
-                
-                if(dataO.length > 0) {
-                    logContainer.innerHTML = dataO.slice(-3).reverse().map(o => `
-                        <div class="bg-white py-3 px-6 rounded-2xl w-full flex justify-between items-center text-[10px] font-bold text-slate-500 shadow-sm border border-slate-50">
-                            <span><b class="text-slate-800 uppercase">${o.NamaPembeli}</b> menempah <span class="text-green-600">${o.NamaBarang}</span></span>
-                            <span class="bg-slate-50 px-2 py-1 rounded-lg text-slate-400">${o.Beratkg}kg</span>
-                        </div>
-                    `).join('');
-                }
-
-            } catch (e) { console.error("Ralat muat data"); }
+            } catch (e) { console.error(e); }
         }
 
-        function updateHarga() {
-            const select = document.getElementById('uBarang');
-            const harga = select.options[select.selectedIndex]?.dataset.harga || 0;
-            const berat = document.getElementById('uBerat').value || 0;
-            document.getElementById('uTotal').innerText = "RM " + (parseFloat(harga) * parseFloat(berat)).toFixed(2);
+        function updateHarga() { kiraTotal(); }
+
+        function kiraTotal() {
+            const barang = document.getElementById('pilihBarang').value;
+            const berat = document.getElementById('berat').value;
+            const item = senaraiProduk.find(p => p.NamaBarang === barang);
+            
+            if (item && berat) {
+                const total = item.Hargakg * berat;
+                document.getElementById('totalHarga').innerText = total.toFixed(2);
+            } else {
+                document.getElementById('totalHarga').innerText = "0.00";
+            }
         }
 
         async function hantarPesanan() {
-            const btn = document.getElementById('btnHantar');
-            const nama = document.getElementById('uNama').value;
-            const fon = document.getElementById('uFon').value;
-            const barang = document.getElementById('uBarang').value;
-            const berat = document.getElementById('uBerat').value;
-            const total = document.getElementById('uTotal').innerText.replace('RM ', '');
+            const nama = document.getElementById('custNama').value;
+            const fon = document.getElementById('custFon').value;
+            const barang = document.getElementById('pilihBarang').value;
+            const berat = document.getElementById('berat').value;
+            const total = document.getElementById('totalHarga').innerText;
 
-            if (!nama || !fon || !barang || !berat || berat <= 0) {
-                return Swal.fire('Perhatian', 'Sila lengkapkan maklumat pesanan.', 'warning');
+            if (!nama || !fon || !barang || !berat) {
+                return Swal.fire('Ops!', 'Sila lengkapkan borang.', 'warning');
             }
 
-            btn.disabled = true; btn.innerText = "Sila Tunggu...";
+            Swal.fire({ title: 'Menghantar...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
                 const resp = await fetch(API, {
                     method: 'POST',
                     body: JSON.stringify({ action: 'tambahPesanan', nama, fon, barang, berat, total })
                 });
-                const result = await resp.text();
-                if (result === "SUCCESS") {
-                    await Swal.fire('Berjaya!', 'Pesanan anda telah dihantar.', 'success');
-                    location.reload();
+
+                if (await resp.text() === "SUCCESS") {
+                    Swal.fire('Berjaya!', 'Pesanan anda telah diterima.', 'success').then(() => location.reload());
                 }
-            } catch (e) {
-                Swal.fire('Ralat', 'Gagal menyambung ke pelayan.', 'error');
-                btn.disabled = false; btn.innerText = "Hantar Pesanan";
-            }
+            } catch (e) { Swal.fire('Ralat!', 'Gagal menghantar pesanan.', 'error'); }
         }
 
         muatData();
