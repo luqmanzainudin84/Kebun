@@ -6,75 +6,124 @@
     <title>Kedai Kebun Segar</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: #f4f7f6; padding-top: 20px; }
-        .card { border-radius: 12px; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .stok-tag { font-size: 0.8rem; padding: 3px 8px; border-radius: 5px; }
+        body { background: #f4f7f6; padding: 20px; font-family: sans-serif; }
+        .product-card { border: none; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; }
+        .product-card:hover { transform: translateY(-5px); }
+        .stok-badge { font-size: 0.8rem; padding: 5px 10px; border-radius: 20px; }
+        .log-section { background: white; padding: 20px; border-radius: 15px; margin-top: 30px; }
     </style>
 </head>
 <body>
-<div class="container">
-    <h2 class="text-center mb-4 text-success">🌿 Jualan Hasil Kebun</h2>
-    
-    <div id="produkContainer" class="row g-3 mb-5"></div>
 
-    <div class="card p-4 mb-5">
-        <h4>Borang Pesanan</h4>
+<div class="container" style="max-width: 800px;">
+    <h2 class="text-center text-success fw-bold mb-4">🌿 Hasil Kebun Kita</h2>
+    
+    <div id="produkContainer" class="row g-3 mb-4">
+        <p class="text-center">Memuatkan barang segar...</p>
+    </div>
+
+    <div class="card p-4 shadow-sm">
+        <h4 class="mb-3">Borang Pesanan</h4>
         <form id="orderForm">
-            <div class="mb-3"><label>Nama</label><input type="text" id="nama" class="form-control" required></div>
-            <div class="mb-3"><label>No Fon</label><input type="number" id="fon" class="form-control" placeholder="60123456789" required></div>
-            <div class="mb-3"><label>Barang</label><select id="barang" class="form-select" onchange="kiraTotal()"></select></div>
-            <div class="mb-3"><label>Berat (kg)</label><input type="number" id="berat" class="form-control" step="0.1" oninput="kiraTotal()" required></div>
-            <h5>Total: RM <span id="totalDisplay">0.00</span></h5>
-            <button type="submit" class="btn btn-success w-100 mt-3">Hantar Pesanan</button>
+            <div class="mb-3">
+                <label class="form-label">Nama Pembeli</label>
+                <input type="text" id="nama" class="form-control" placeholder="Nama anda" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">No. Telefon</label>
+                <input type="number" id="fon" class="form-control" placeholder="60123456789" required>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Pilih Barang</label>
+                    <select id="barang" class="form-select" onchange="kiraTotal()" required></select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Berapa KG?</label>
+                    <input type="number" id="berat" class="form-control" step="0.1" min="0.1" oninput="kiraTotal()" required>
+                </div>
+            </div>
+            <div class="alert alert-success d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Jumlah Bayaran:</h5>
+                <h5 class="mb-0 text-bold">RM <span id="totalDisplay">0.00</span></h5>
+            </div>
+            <button type="submit" id="btnHantar" class="btn btn-success w-100 py-2 fw-bold">Hantar Pesanan Sekarang</button>
         </form>
     </div>
 
-    <h4>Log Pembelian</h4>
-    <div class="table-responsive"><table class="table bg-white rounded shadow-sm">
-        <thead><tr><th>Nama</th><th>Barang</th><th>KG</th></tr></thead>
-        <tbody id="logTabel"></tbody>
-    </table></div>
+    <div class="log-section shadow-sm">
+        <h5 class="mb-3 text-secondary">Log Pembelian Terkini</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr><th>Nama</th><th>Barang</th><th>Berat</th></tr>
+                </thead>
+                <tbody id="logTabel"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
-    const API = "URL_APPS_SCRIPT_ANDA_DI_SINI"; // GANTI INI!
-    let dataBarang = [];
+    // LINK GS ANDA YANG TELAH DIMASUKKAN
+    const API_URL = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
+    let listBarang = [];
 
-    async function loadData() {
-        const res = await fetch(API + "?action=getProduk");
-        dataBarang = await res.json();
-        let html = ""; let opt = "<option>Pilih...</option>";
-        dataBarang.forEach(i => {
-            html += `<div class="col-6 col-md-4"><div class="card p-3">
-                <h6>${i.NamaBarang}</h6>
-                <p class="mb-1 text-muted">RM${i.Harga}/kg</p>
-                <span class="stok-tag ${i.Stok < 3 ? 'bg-danger text-white':'bg-light'}">Stok: ${i.Stok}kg</span>
-                <a href="${i.MapLink}" target="_blank" class="btn btn-outline-primary btn-sm mt-2">📍 Lokasi</a>
-            </div></div>`;
-            opt += `<option value="${i.NamaBarang}">${i.NamaBarang}</option>`;
-        });
-        document.getElementById("produkContainer").innerHTML = html;
-        document.getElementById("barang").innerHTML = opt;
+    // Ambil Data Produk & Log
+    async function init() {
+        try {
+            const resProduk = await fetch(API_URL + "?action=getProduk");
+            listBarang = await resProduk.json();
+            
+            let htmlProduk = "";
+            let optBarang = "<option value=''>-- Pilih Barang --</option>";
+            
+            listBarang.forEach(item => {
+                htmlProduk += `
+                <div class="col-6 col-md-4">
+                    <div class="card p-3 product-card h-100 text-center">
+                        <h6 class="fw-bold">${item.NamaBarang}</h6>
+                        <p class="text-success mb-1">RM${item.Harga.toFixed(2)}/kg</p>
+                        <p class="mb-2"><span class="stok-badge ${item.Stok < 5 ? 'bg-danger text-white' : 'bg-light text-muted'}">Stok: ${item.Stok}kg</span></p>
+                        <div class="d-grid gap-1">
+                            <a href="${item.MapLink}" target="_blank" class="btn btn-sm btn-outline-primary">📍 Lokasi</a>
+                        </div>
+                    </div>
+                </div>`;
+                optBarang += `<option value="${item.NamaBarang}">${item.NamaBarang}</option>`;
+            });
+            document.getElementById("produkContainer").innerHTML = htmlProduk;
+            document.getElementById("barang").innerHTML = optBarang;
 
-        const res2 = await fetch(API + "?action=getPesanan");
-        const orders = await res2.json();
-        let logHtml = "";
-        orders.reverse().slice(0,10).forEach(o => {
-            logHtml += `<tr><td>${o.Nama}</td><td>${o.Barang}</td><td>${o.Berat}</td></tr>`;
-        });
-        document.getElementById("logTabel").innerHTML = logHtml;
+            const resLog = await fetch(API_URL + "?action=getPesanan");
+            const dataLog = await resLog.json();
+            let htmlLog = "";
+            dataLog.reverse().slice(0, 5).forEach(log => {
+                htmlLog += `<tr><td>${log.Nama}</td><td>${log.Barang}</td><td>${log.Berat}kg</td></tr>`;
+            });
+            document.getElementById("logTabel").innerHTML = htmlLog;
+        } catch (e) {
+            console.error("Gagal ambil data", e);
+        }
     }
 
     function kiraTotal() {
-        let b = document.getElementById("barang").value;
-        let w = document.getElementById("berat").value;
-        let item = dataBarang.find(x => x.NamaBarang == b);
-        if(item) document.getElementById("totalDisplay").innerText = (item.Harga * w).toFixed(2);
+        const barangDipilih = document.getElementById("barang").value;
+        const beratInput = document.getElementById("berat").value;
+        const item = listBarang.find(x => x.NamaBarang === barangDipilih);
+        if (item && beratInput) {
+            document.getElementById("totalDisplay").innerText = (item.Harga * beratInput).toFixed(2);
+        }
     }
 
+    // Submit Pesanan
     document.getElementById("orderForm").onsubmit = async (e) => {
         e.preventDefault();
-        const payload = {
+        const btn = document.getElementById("btnHantar");
+        btn.disabled = true;
+        btn.innerText = "Menghantar...";
+
+        const data = {
             action: "tambahPesanan",
             nama: document.getElementById("nama").value,
             fon: document.getElementById("fon").value,
@@ -82,11 +131,17 @@
             berat: document.getElementById("berat").value,
             total: document.getElementById("totalDisplay").innerText
         };
-        await fetch(API, { method: "POST", body: JSON.stringify(payload) });
-        alert("Pesanan diterima!"); location.reload();
+
+        await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(data)
+        });
+
+        alert("Pesanan Berjaya! Terima kasih.");
+        location.reload();
     };
 
-    loadData();
+    init();
 </script>
 </body>
 </html>
