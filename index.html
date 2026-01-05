@@ -13,19 +13,20 @@
         .product-card { background: white; border-radius: 35px; box-shadow: 0 15px 30px -10px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
         .input-field { background: #f1f5f9; border-radius: 20px; border: 2px solid transparent; transition: 0.3s; }
         .input-field:focus-within { border-color: #10b981; background: white; }
+        .order-log-card { background: white; border-radius: 30px; border-left: 8px solid #3b82f6; }
     </style>
 </head>
-<body class="pb-10">
+<body class="pb-20">
 
     <div class="hero-section pt-16 pb-24 px-6 text-center text-white">
         <h1 class="text-4xl font-black uppercase tracking-tighter">Panel Pesanan</h1>
         <p class="text-[10px] font-bold opacity-80 uppercase tracking-[0.2em] mt-2 text-emerald-100">Segar Dari Ladang • Pesan Sekarang</p>
     </div>
 
-    <div class="max-w-md mx-auto px-4 -mt-16 space-y-6">
+    <div class="max-w-md mx-auto px-4 -mt-16 space-y-8">
         
         <div id="produkDisplay" class="space-y-4">
-            <div class="text-center py-10 text-white font-bold opacity-50 uppercase text-xs tracking-widest">Memuatkan stok terkini...</div>
+            <div class="text-center py-10 text-white font-bold opacity-50 uppercase text-xs tracking-widest animate-pulse">Memuatkan stok...</div>
         </div>
 
         <div class="bg-white rounded-[45px] p-8 shadow-2xl border border-slate-50">
@@ -73,6 +74,12 @@
                 </button>
             </div>
         </div>
+
+        <section id="logBelianSection">
+            <p class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest text-center italic">Rekod Pesanan Terkini</p>
+            <div id="logPesananContainer" class="space-y-4">
+                </div>
+        </section>
     </div>
 
     <script>
@@ -81,10 +88,10 @@
 
         async function muatData() {
             try {
-                const res = await fetch(API + "?action=getProduk");
-                senaraiProduk = await res.json();
+                // Muat data Produk
+                const resP = await fetch(API + "?action=getProduk");
+                senaraiProduk = await resP.json();
                 
-                // Render Kad Produk
                 document.getElementById('produkDisplay').innerHTML = senaraiProduk.map(p => `
                     <div class="product-card p-6 flex flex-col relative overflow-hidden">
                         <div class="flex justify-between items-start mb-4">
@@ -96,20 +103,19 @@
                                 <span class="text-[10px] font-black text-emerald-700 uppercase">Stok: ${p.Stok}kg</span>
                             </div>
                         </div>
-
                         <div class="flex items-center justify-between mt-2 pt-4 border-t border-slate-50">
                             <div class="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
                                 <span class="text-red-500 text-xs">📍</span> ${p.Lokasi}
                             </div>
-                            <button onclick="window.open('https://www.google.com/maps?q=${p.Coords}')" class="bg-blue-50 px-4 py-2 rounded-xl text-[10px] font-black text-blue-600 uppercase hover:bg-blue-100 transition-all">
+                            <button onclick="window.open('https://www.google.com/maps?q=${p.Coords}')" class="bg-blue-50 px-4 py-2 rounded-xl text-[10px] font-black text-blue-600 uppercase">
                                 🗺️ Lokasi Pin
                             </button>
                         </div>
                     </div>
                 `).join('');
 
-                // Render Dropdown
                 const select = document.getElementById('pilihBarang');
+                select.innerHTML = '<option value="">-- PILIH BARANG --</option>';
                 senaraiProduk.forEach(p => {
                     let opt = document.createElement('option');
                     opt.value = p.NamaBarang;
@@ -117,8 +123,29 @@
                     select.add(opt);
                 });
 
+                // Muat data Pesanan (Log Belian)
+                const resO = await fetch(API + "?action=getPesanan");
+                const pesanan = await resO.json();
+                document.getElementById('logPesananContainer').innerHTML = pesanan.reverse().slice(0, 10).map(o => `
+                    <div class="order-log-card p-5 shadow-lg flex flex-col">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-black text-blue-600 uppercase text-sm">${o.NamaPembeli}</h4>
+                            <span class="text-[8px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-full">${o.Timestamp.split('T')[0]}</span>
+                        </div>
+                        <div class="bg-blue-50/50 p-3 rounded-xl mb-3 text-center">
+                            <span class="font-black text-slate-700 uppercase text-xs">${o.NamaBarang} — ${o.Beratkg}KG</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Bayaran:</span>
+                            <span class="text-lg font-black text-slate-900">RM${o.TotalHarga}</span>
+                        </div>
+                    </div>
+                `).join('');
+
             } catch (e) { console.error("Gagal muat data:", e); }
         }
+
+        function updateHarga() { kiraTotal(); }
 
         function kiraTotal() {
             const barang = document.getElementById('pilihBarang').value;
@@ -153,9 +180,12 @@
                 });
 
                 if (await resp.text() === "SUCCESS") {
-                    Swal.fire('Berjaya!', 'Pesanan dihantar. Kami akan hubungi anda.', 'success').then(() => location.reload());
+                    Swal.fire('Berjaya!', 'Pesanan anda telah direkodkan.', 'success').then(() => muatData());
+                    // Reset form
+                    document.getElementById('berat').value = '';
+                    document.getElementById('totalHarga').innerText = '0.00';
                 }
-            } catch (e) { Swal.fire('Ralat!', 'Sistem sedang sibuk.', 'error'); }
+            } catch (e) { Swal.fire('Ralat!', 'Gagal hantar pesanan.', 'error'); }
         }
 
         muatData();
