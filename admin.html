@@ -15,14 +15,17 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: white; }
         .admin-card { background: #1e293b; border-radius: 30px; border: 1px solid #334155; }
         #map-container { height: 250px; width: 100%; border-radius: 20px; margin-top: 10px; z-index: 10; border: 2px solid #334155; }
-        .swal2-popup { border-radius: 35px !important; background: #1e293b !important; color: white !important; }
+        .swal2-popup { border-radius: 35px !important; background: #1e293b !important; color: white !important; width: 95% !important; }
+        .cogs-input { background: #0f172a !important; border: 1px solid #334155 !important; color: #10b981 !important; font-weight: bold; padding: 10px; border-radius: 10px; width: 100%; outline: none; text-align: right; }
+        .cogs-label { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
         .btn-action { padding: 12px; border-radius: 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-pay { background: #10b981; color: white; }
         .btn-collect { background: #f59e0b; color: white; }
         .btn-wa { background: #25d366; color: white; }
         .btn-call { background: #3b82f6; color: white; }
         .status-done { opacity: 0.4; filter: grayscale(1); }
-        .cogs-input { background: #0f172a !important; border: 1px solid #334155 !important; color: #10b981 !important; font-weight: bold; padding: 10px; border-radius: 10px; width: 100%; outline: none; text-align: right; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
 <body class="pb-24">
@@ -31,10 +34,10 @@
         <h1 class="text-3xl font-extrabold text-center text-green-400 uppercase tracking-tighter">Panel Kawalan Admin</h1>
         
         <div class="grid grid-cols-1 gap-3">
-            <button onclick="bukaKiraCOGS()" class="w-full bg-blue-600 text-white p-5 rounded-[25px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 border-b-4 border-blue-800">
+            <button onclick="bukaKiraCOGS()" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-5 rounded-[25px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center justify-center gap-3 border-b-4 border-blue-800">
                 📊 Kalkulator Kos (COGS)
             </button>
-            <button onclick="bukaTambahProduk()" class="w-full bg-green-600 text-white p-5 rounded-[25px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">
+            <button onclick="bukaTambahProduk()" class="w-full bg-green-600 hover:bg-green-500 text-white p-5 rounded-[25px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">
                 + Tambah Produk Baru
             </button>
         </div>
@@ -53,6 +56,61 @@
     <script>
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
         let leafMap, leafMarker;
+
+        // FUNGSI FORMAT DECIMAL UNTUK COGS
+        function formatInputDecimal(input) {
+            let value = input.value.replace(/\D/g, "");
+            if (value === "") { input.value = ""; return; }
+            input.value = (parseFloat(value) / 100).toFixed(2);
+        }
+
+        // FUNGSI UTAMA KALKULATOR COGS (DIKEMBALIKAN)
+        async function bukaKiraCOGS() {
+            const { value: formValues } = await Swal.fire({
+                title: 'KALKULATOR COGS',
+                html: `
+                <div class="text-left space-y-4 max-h-[60vh] overflow-y-auto px-2 custom-scrollbar">
+                    <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
+                        <p class="text-blue-400 font-black text-[10px] uppercase mb-3 underline">A. Hasil Pengeluaran</p>
+                        <label class="cogs-label">Jumlah Hasil Musim (kg)</label>
+                        <input id="hasil_kg" type="number" class="cogs-input mb-2" placeholder="0">
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
+                        <p class="text-green-400 font-black text-[10px] uppercase mb-3 underline">B. Kos Operasi (RM)</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="cogs-label">Benih</label><input id="k_benih" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Baja</label><input id="k_baja" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Racun</label><input id="k_racun" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Buruh</label><input id="k_buruh" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Utiliti</label><input id="k_utiliti" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Lain-lain</label><input id="k_lain" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                        </div>
+                    </div>
+                </div>`,
+                confirmButtonText: 'KIRA COGS',
+                confirmButtonColor: '#2563eb',
+                preConfirm: () => {
+                    const hasil = parseFloat(document.getElementById('hasil_kg').value) || 1;
+                    const kosTotal = 
+                        (parseFloat(document.getElementById('k_benih').value) || 0) + 
+                        (parseFloat(document.getElementById('k_baja').value) || 0) + 
+                        (parseFloat(document.getElementById('k_racun').value) || 0) + 
+                        (parseFloat(document.getElementById('k_buruh').value) || 0) + 
+                        (parseFloat(document.getElementById('k_utiliti').value) || 0) + 
+                        (parseFloat(document.getElementById('k_lain').value) || 0);
+                    return kosTotal / hasil;
+                }
+            });
+            if (formValues) {
+                Swal.fire({
+                    title: 'KEPUTUSAN',
+                    html: `<div class="p-6 bg-green-500/10 rounded-3xl border border-green-500/20">
+                            <p class="text-[10px] font-black text-green-400 uppercase">Kos Pengeluaran</p>
+                            <h2 class="text-4xl font-black text-white">RM ${formValues.toFixed(2)}/KG</h2>
+                           </div>`
+                });
+            }
+        }
 
         async function muatAdminData() {
             try {
@@ -74,8 +132,6 @@
                 document.getElementById('adminPesananContainer').innerHTML = pesanan.reverse().map(o => {
                     const isPaid = o.StatusBayar === "SETTLE";
                     const isTaken = o.StatusAmbil === "SETTLE";
-                    
-                    // FIX NOMBOR TELEFON (KEKALKAN 0 DI HADAPAN)
                     let tel = o.NoWhatsapp.toString();
                     if (!tel.startsWith('0') && !tel.startsWith('60')) tel = '0' + tel;
                     let waLink = tel.startsWith('0') ? '6' + tel : tel;
@@ -115,23 +171,6 @@
             Swal.close();
         }
 
-        async function bukaKiraCOGS() {
-            const { value: formValues } = await Swal.fire({
-                title: 'KALKULATOR COGS',
-                html: `<div class="text-left space-y-4 px-2">
-                    <input id="hasil_kg" type="number" class="cogs-input" placeholder="Hasil Musim (kg)">
-                    <input id="kos_total" type="number" class="cogs-input" placeholder="Jumlah Kos (RM)">
-                </div>`,
-                confirmButtonText: 'KIRA',
-                preConfirm: () => {
-                    const h = parseFloat(document.getElementById('hasil_kg').value) || 1;
-                    const k = parseFloat(document.getElementById('kos_total').value) || 0;
-                    return k / h;
-                }
-            });
-            if (formValues) Swal.fire('Kos Pengeluaran:', 'RM ' + formValues.toFixed(2) + '/kg', 'success');
-        }
-
         async function bukaTambahProduk() { await popupBorangProduk('TAMBAH PRODUK', '', '', '', '', '4.6619,101.0691', 'tambahProduk'); }
         async function bukaEditProduk(nama, harga, stok, lokasi, coords) { await popupBorangProduk('EDIT PRODUK', nama, harga, stok, lokasi, coords, 'kemaskiniProduk'); }
 
@@ -142,7 +181,7 @@
                     <input id="swal-nama" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl text-white font-bold" value="${nama}" placeholder="Nama Produk">
                     <input id="swal-harga" type="number" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl text-white font-bold" value="${harga}" placeholder="Harga/kg">
                     <input id="swal-stok" type="number" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl text-white font-bold" value="${stok}" placeholder="Stok (kg)">
-                    <input id="swal-lokasi" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl text-white font-bold" value="${lokasi}" placeholder="Lokasi Kebun">
+                    <input id="swal-lokasi" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-2xl text-white font-bold" value="${lokasi}" placeholder="Lokasi">
                     <div id="map-container"></div>
                     <input id="swal-coords" class="w-full p-3 bg-slate-800 text-green-500 rounded-xl text-xs" value="${coords}" readonly>
                 </div>`,
@@ -154,10 +193,8 @@
                 }
             });
             if (f) {
-                Swal.fire({ title: 'Menyimpan...', didOpen: () => Swal.showLoading() });
                 await fetch(API, { method: 'POST', body: JSON.stringify(f) });
                 muatAdminData();
-                Swal.fire('Berjaya', 'Data Produk Dikemaskini', 'success');
             }
         }
 
