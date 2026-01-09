@@ -50,14 +50,14 @@
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
         let leafMap, leafMarker;
 
-        // FUNGSI AUTO DECIMAL UNTUK COGS
+        // FUNGSI AUTO DECIMAL
         function formatInputDecimal(input) {
             let value = input.value.replace(/\D/g, "");
-            if (value === "") { input.value = "0.00"; return; }
+            if (value === "") { input.value = ""; return; }
             input.value = (parseFloat(value) / 100).toFixed(2);
         }
 
-        // FUNGSI MUAT DATA (KEKAL)
+        // FUNGSI MUAT DATA
         async function muatAdminData() {
             try {
                 const resP = await fetch(API + "?action=getProduk");
@@ -90,7 +90,7 @@
             } catch (e) { console.log(e); }
         }
 
-        // FUNGSI COGS (DENGAN AUTO-DECIMAL)
+        // FUNGSI COGS (KOS DIKOSONGKAN APABILA KLIK)
         async function bukaKiraCOGS() {
             const { value: formValues } = await Swal.fire({
                 title: 'KALKULATOR COGS',
@@ -99,26 +99,26 @@
                     <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
                         <p class="text-blue-400 font-black text-[10px] uppercase mb-3 underline">A. Hasil Pengeluaran</p>
                         <label class="cogs-label">Jumlah Hasil Musim (kg)</label>
-                        <input id="hasil_kg" type="number" class="cogs-input mb-2" placeholder="Cth: 1000">
+                        <input id="hasil_kg" type="number" class="cogs-input mb-2" placeholder="0" onfocus="this.value=''">
                     </div>
                     <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
                         <p class="text-green-400 font-black text-[10px] uppercase mb-3 underline">B. Kos Operasi (RM)</p>
                         <div class="grid grid-cols-2 gap-2">
-                            <div><label class="cogs-label">Benih</label><input id="k_benih" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                            <div><label class="cogs-label">Baja</label><input id="k_baja" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                            <div><label class="cogs-label">Racun</label><input id="k_racun" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                            <div><label class="cogs-label">Buruh</label><input id="k_buruh" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                            <div><label class="cogs-label">Utiliti</label><input id="k_utiliti" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                            <div><label class="cogs-label">Lain-lain</label><input id="k_lain" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Benih</label><input id="k_benih" type="text" class="cogs-input" value="0.00" onfocus="this.value=''" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Baja</label><input id="k_baja" type="text" class="cogs-input" value="0.00" onfocus="this.value=''" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Racun</label><input id="k_racun" type="text" class="cogs-input" value="0.00" onfocus="this.value=''" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Buruh</label><input id="k_buruh" type="text" class="cogs-input" value="0.00" onfocus="this.value=''" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Utiliti</label><input id="k_utiliti" type="text" class="cogs-input" value="0.00" onfocus="this.value=''" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Lain-lain</label><input id="k_lain" type="text" class="cogs-input" value="0.00" onfocus="this.value=''" oninput="formatInputDecimal(this)"></div>
                         </div>
                     </div>
                     <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
                         <p class="text-orange-400 font-black text-[10px] uppercase mb-3 underline">C. Susut Nilai Aset</p>
                         <label class="cogs-label">Kos Sistem (RM)</label>
-                        <input id="aset_kos" type="text" class="cogs-input mb-2" value="0.00" oninput="formatInputDecimal(this)">
+                        <input id="aset_kos" type="text" class="cogs-input mb-2" value="0.00" onfocus="this.value=''" oninput="formatInputDecimal(this)">
                         <div class="grid grid-cols-2 gap-2">
-                            <div><label class="cogs-label">Tahun Guna</label><input id="aset_tahun" type="number" class="cogs-input" value="1"></div>
-                            <div><label class="cogs-label">Musim/Thn</label><input id="aset_musim" type="number" class="cogs-input" value="1"></div>
+                            <div><label class="cogs-label">Tahun Guna</label><input id="aset_tahun" type="number" class="cogs-input" value="1" onfocus="this.value=''"></div>
+                            <div><label class="cogs-label">Musim/Thn</label><input id="aset_musim" type="number" class="cogs-input" value="1" onfocus="this.value=''"></div>
                         </div>
                     </div>
                 </div>`,
@@ -132,7 +132,7 @@
                 }
             });
             if (formValues) {
-                Swal.fire({ title: 'KEPUTUSAN', html: `<div class="p-6 bg-green-500/10 rounded-3xl border border-green-500/20"><p class="text-[10px] font-black text-green-400 uppercase">Kos Pengeluaran</p><h2 class="text-4xl font-black">RM ${formValues.perKg.toFixed(2)}/KG</h2></div>` });
+                Swal.fire({ title: 'KEPUTUSAN', html: `<div class="p-6 bg-green-500/10 rounded-3xl border border-green-500/20"><p class="text-[10px] font-black text-green-400 uppercase">Kos Pengeluaran</p><h2 class="text-4xl font-black text-white">RM ${formValues.perKg.toFixed(2)}/KG</h2></div>` });
             }
         }
 
