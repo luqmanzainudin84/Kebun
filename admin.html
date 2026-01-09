@@ -16,7 +16,7 @@
         .admin-card { background: #1e293b; border-radius: 30px; border: 1px solid #334155; cursor: pointer; }
         #map-container { height: 250px; width: 100%; border-radius: 20px; margin-top: 10px; z-index: 10; border: 2px solid #334155; }
         .swal2-popup { border-radius: 35px !important; background: #1e293b !important; color: white !important; width: 95% !important; }
-        .cogs-input { background: #0f172a !important; border: 1px solid #334155 !important; color: #10b981 !important; font-weight: bold; padding: 10px; border-radius: 10px; width: 100%; outline: none; }
+        .cogs-input { background: #0f172a !important; border: 1px solid #334155 !important; color: #10b981 !important; font-weight: bold; padding: 10px; border-radius: 10px; width: 100%; outline: none; text-align: right; }
         .cogs-label { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -49,6 +49,13 @@
     <script>
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
         let leafMap, leafMarker;
+
+        // FUNGSI AUTO DECIMAL UNTUK COGS
+        function formatInputDecimal(input) {
+            let value = input.value.replace(/\D/g, "");
+            if (value === "") { input.value = "0.00"; return; }
+            input.value = (parseFloat(value) / 100).toFixed(2);
+        }
 
         // FUNGSI MUAT DATA (KEKAL)
         async function muatAdminData() {
@@ -83,7 +90,7 @@
             } catch (e) { console.log(e); }
         }
 
-        // FUNGSI COGS (BARU TAMBAH)
+        // FUNGSI COGS (DENGAN AUTO-DECIMAL)
         async function bukaKiraCOGS() {
             const { value: formValues } = await Swal.fire({
                 title: 'KALKULATOR COGS',
@@ -97,18 +104,18 @@
                     <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
                         <p class="text-green-400 font-black text-[10px] uppercase mb-3 underline">B. Kos Operasi (RM)</p>
                         <div class="grid grid-cols-2 gap-2">
-                            <div><label class="cogs-label">Benih</label><input id="k_benih" type="number" class="cogs-input" value="0"></div>
-                            <div><label class="cogs-label">Baja</label><input id="k_baja" type="number" class="cogs-input" value="0"></div>
-                            <div><label class="cogs-label">Racun</label><input id="k_racun" type="number" class="cogs-input" value="0"></div>
-                            <div><label class="cogs-label">Buruh</label><input id="k_buruh" type="number" class="cogs-input" value="0"></div>
-                            <div><label class="cogs-label">Utiliti</label><input id="k_utiliti" type="number" class="cogs-input" value="0"></div>
-                            <div><label class="cogs-label">Lain-lain</label><input id="k_lain" type="number" class="cogs-input" value="0"></div>
+                            <div><label class="cogs-label">Benih</label><input id="k_benih" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Baja</label><input id="k_baja" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Racun</label><input id="k_racun" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Buruh</label><input id="k_buruh" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Utiliti</label><input id="k_utiliti" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                            <div><label class="cogs-label">Lain-lain</label><input id="k_lain" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
                         </div>
                     </div>
                     <div class="bg-slate-800/50 p-4 rounded-2xl border border-slate-700">
                         <p class="text-orange-400 font-black text-[10px] uppercase mb-3 underline">C. Susut Nilai Aset</p>
                         <label class="cogs-label">Kos Sistem (RM)</label>
-                        <input id="aset_kos" type="number" class="cogs-input mb-2" value="0">
+                        <input id="aset_kos" type="text" class="cogs-input mb-2" value="0.00" oninput="formatInputDecimal(this)">
                         <div class="grid grid-cols-2 gap-2">
                             <div><label class="cogs-label">Tahun Guna</label><input id="aset_tahun" type="number" class="cogs-input" value="1"></div>
                             <div><label class="cogs-label">Musim/Thn</label><input id="aset_musim" type="number" class="cogs-input" value="1"></div>
