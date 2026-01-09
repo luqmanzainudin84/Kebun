@@ -12,12 +12,13 @@
         .input-box { width: 100%; padding: 16px; border-radius: 20px; border: 2px solid #e2e8f0; outline: none; transition: 0.3s; background: white; font-weight: 600; }
         .input-box:focus { border-color: #22c55e; }
         .log-item { background: white; padding: 12px 18px; border-radius: 18px; border: 1px solid #e2e8f0; margin-bottom: 8px; }
-        .floating-action { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px 20px 30px 20px; border-radius: 30px 30px 0 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.05); z-index: 100; }
+        /* Floating UI di bahagian bawah */
+        .floating-action { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px 20px 30px 20px; border-radius: 30px 30px 0 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.08); z-index: 100; }
     </style>
 </head>
-<body class="pb-[180px]"> <div class="bg-green-600 p-8 pt-12 rounded-b-[40px] shadow-lg text-center">
+<body class="pb-[220px]"> <div class="bg-green-600 p-8 pt-12 rounded-b-[40px] shadow-lg text-center">
         <h1 class="text-white text-xl font-extrabold uppercase tracking-widest">Tempahan Segar Kebun</h1>
-        <p class="text-green-100 text-[10px] font-bold mt-1 opacity-80 uppercase italic">Terus Dari Ladang</p>
+        <p class="text-green-100 text-[10px] font-bold mt-1 opacity-80 uppercase italic">Terus Dari Ladang Ke Meja Anda</p>
     </div>
 
     <div class="max-w-md mx-auto px-5 -mt-6 space-y-5">
@@ -30,7 +31,8 @@
                 </div>
                 <div class="text-right">
                     <div class="bg-green-50 px-3 py-1 rounded-full border border-green-100">
-                        <p class="text-[8px] font-black text-green-600 uppercase">Stok: <span id="viewStok" class="text-xs">0kg</span></p>
+                        <p class="text-[8px] font-black text-green-600 uppercase italic">Baki Stok</p>
+                        <p id="viewStok" class="text-sm font-extrabold text-slate-800">0kg</p>
                     </div>
                 </div>
             </div>
@@ -41,8 +43,10 @@
         </div>
 
         <div class="bg-white p-6 rounded-[30px] shadow-md border border-slate-100 space-y-4">
+            <p class="text-center text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-2">Borang Pesanan</p>
+            
             <div>
-                <label class="text-[10px] font-extrabold text-slate-400 uppercase ml-2 tracking-widest">Pilih Barang</label>
+                <label class="text-[10px] font-extrabold text-slate-400 uppercase ml-2 tracking-widest">Pilih Produk</label>
                 <select id="pilihBarang" onchange="tukarProduk()" class="input-box mt-1 appearance-none">
                     <option value="">-- SILA PILIH --</option>
                 </select>
@@ -51,7 +55,7 @@
             <div class="grid grid-cols-1 gap-4">
                 <div>
                     <label class="text-[10px] font-extrabold text-slate-400 uppercase ml-2 tracking-widest">Nama Anda</label>
-                    <input id="namaPembeli" type="text" class="input-box mt-1" placeholder="Contoh: Abu Bakar">
+                    <input id="namaPembeli" type="text" class="input-box mt-1" placeholder="Cth: Abu Bakar">
                 </div>
                 <div>
                     <label class="text-[10px] font-extrabold text-slate-400 uppercase ml-2 tracking-widest">No. WhatsApp</label>
@@ -65,14 +69,14 @@
                     <input id="beratKg" type="number" step="0.1" oninput="kiraTotal()" class="input-box mt-1" placeholder="0.0">
                     <span class="absolute right-5 top-5 font-black text-slate-300">KG</span>
                 </div>
-                <p id="msgStok" class="text-[10px] font-bold text-red-500 mt-2 hidden text-center">⚠ Maaf, baki stok tidak mencukupi!</p>
+                <p id="msgStok" class="text-[10px] font-bold text-red-500 mt-2 hidden text-center italic">⚠ Maaf, baki stok tidak mencukupi!</p>
             </div>
         </div>
 
         <div class="px-2">
             <h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-[0.2em] mb-3">Pesanan Terkini</h3>
-            <div id="logArea" class="space-y-2">
-                <p class="text-center text-xs text-slate-300 italic py-4 uppercase font-bold tracking-widest">Memuatkan log...</p>
+            <div id="logArea" class="space-y-2 pb-10">
+                <p class="text-center text-xs text-slate-300 italic py-4">Memuatkan log...</p>
             </div>
         </div>
     </div>
@@ -80,11 +84,11 @@
     <div class="floating-action max-w-md mx-auto">
         <div class="bg-green-500 p-4 rounded-2xl flex items-center justify-between shadow-lg mb-3">
             <div>
-                <p class="text-[9px] font-black text-green-100 uppercase">Jumlah Bayaran</p>
-                <h2 class="text-2xl font-extrabold text-white leading-none">RM <span id="totalHarga">0.00</span></h2>
+                <p class="text-[9px] font-black text-green-100 uppercase leading-none">Jumlah Bayaran</p>
+                <h2 class="text-2xl font-extrabold text-white">RM <span id="totalHarga">0.00</span></h2>
             </div>
             <div class="bg-green-700/30 px-3 py-1 rounded-lg border border-white/20">
-                 <p class="text-[10px] font-bold text-white">STATUS: <span class="text-green-200">READY</span></p>
+                 <p class="text-[10px] font-bold text-white uppercase italic">Status: Ready</p>
             </div>
         </div>
         <button id="btnHantar" onclick="hantarPesanan()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-extrabold uppercase tracking-widest active:scale-95 transition-all shadow-2xl">
@@ -99,13 +103,13 @@
 
         async function muatData() {
             try {
-                // 1. Ambil Produk
+                // 1. Muat Produk
                 const resP = await fetch(API + "?action=getProduk");
                 senaraiProduk = await resP.json();
                 document.getElementById('pilihBarang').innerHTML = '<option value="">-- SILA PILIH --</option>' + 
                     senaraiProduk.map(p => `<option value="${p.NamaBarang}">${p.NamaBarang.toUpperCase()} (Baki: ${p.Stok}kg)</option>`).join('');
 
-                // 2. Ambil Log
+                // 2. Muat Log Pesanan
                 const resL = await fetch(API + "?action=getPesanan");
                 const logs = await resL.json();
                 const container = document.getElementById('logArea');
@@ -120,7 +124,7 @@
                             <p class="text-[8px] text-slate-300 font-bold uppercase">${l.Timestamp.split('T')[0]}</p>
                         </div>
                     </div>
-                `).join('') || '<p class="text-center text-xs text-slate-400 py-4 uppercase font-bold tracking-widest">Tiada Pesanan</p>';
+                `).join('') || '<p class="text-center text-xs text-slate-400 py-4 italic uppercase">Tiada Pesanan</p>';
             } catch(e) { console.error(e); }
         }
 
@@ -164,9 +168,9 @@
             const berat = document.getElementById('beratKg').value;
             const total = document.getElementById('totalHarga').innerText;
 
-            if(!nama || !wa || !barang || berat <= 0) return Swal.fire('Ops!', 'Lengkapkan borang dahulu.', 'warning');
+            if(!nama || !wa || !barang || berat <= 0) return Swal.fire('Ops!', 'Sila lengkapkan maklumat pesanan.', 'warning');
 
-            Swal.fire({ title: 'Menyimpan...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            Swal.fire({ title: 'Menghantar...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             try {
                 const res = await fetch(API, {
@@ -175,11 +179,11 @@
                 });
                 const result = await res.json();
                 if(result.includes("Berjaya")) {
-                    Swal.fire('Pesanan Diterima!', 'Stok telah dikemaskini secara automatik.', 'success').then(() => location.reload());
+                    Swal.fire('Berjaya!', 'Pesanan anda diterima & stok dikemaskini.', 'success').then(() => location.reload());
                 } else {
                     Swal.fire('Gagal', result, 'error');
                 }
-            } catch(e) { Swal.fire('Ralat', 'Hubungan ke server terputus.', 'error'); }
+            } catch(e) { Swal.fire('Ralat', 'Gagal hubungi sistem.', 'error'); }
         }
 
         muatData();
