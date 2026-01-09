@@ -14,9 +14,11 @@
         .log-item { background: white; padding: 12px 18px; border-radius: 18px; border: 1px solid #e2e8f0; margin-bottom: 8px; }
         /* Floating UI di bahagian bawah */
         .floating-action { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px 20px 30px 20px; border-radius: 30px 30px 0 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.08); z-index: 100; }
+        .btn-location { background: #ef4444; color: white; padding: 8px 15px; border-radius: 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; transition: 0.3s; display: flex; align-items: center; gap: 5px; }
+        .btn-location:hover { background: #dc2626; }
     </style>
 </head>
-<body class="pb-[220px]"> <div class="bg-green-600 p-8 pt-12 rounded-b-[40px] shadow-lg text-center">
+<body class="pb-[280px]"> <div class="bg-green-600 p-8 pt-12 rounded-b-[40px] shadow-lg text-center">
         <h1 class="text-white text-xl font-extrabold uppercase tracking-widest">Tempahan Segar Kebun</h1>
         <p class="text-green-100 text-[10px] font-bold mt-1 opacity-80 uppercase italic">Terus Dari Ladang Ke Meja Anda</p>
     </div>
@@ -27,16 +29,18 @@
             <div class="flex justify-between items-start">
                 <div>
                     <h2 id="viewNama" class="text-2xl font-extrabold text-slate-800 uppercase leading-none">-</h2>
-                    <p id="viewLokasi" class="text-[10px] text-slate-400 font-bold mt-2 uppercase">📍 -</p>
+                    <p id="viewLokasi" class="text-[10px] text-slate-400 font-bold mt-2 uppercase tracking-tight">📍 -</p>
                 </div>
-                <div class="text-right">
+                <div class="text-right space-y-2">
                     <div class="bg-green-50 px-3 py-1 rounded-full border border-green-100">
-                        <p class="text-[8px] font-black text-green-600 uppercase italic">Baki Stok</p>
-                        <p id="viewStok" class="text-sm font-extrabold text-slate-800">0kg</p>
+                        <p class="text-[8px] font-black text-green-600 uppercase italic">Stok: <span id="viewStok" class="text-xs">0kg</span></p>
                     </div>
+                    <button id="btnMap" onclick="bukaMap()" class="btn-location">
+                        📍 LOKASI
+                    </button>
                 </div>
             </div>
-            <div class="mt-4">
+            <div class="mt-2">
                 <span class="text-3xl font-extrabold text-green-600">RM <span id="viewHarga">0</span></span>
                 <span class="text-slate-400 font-bold text-sm">/kg</span>
             </div>
@@ -75,7 +79,7 @@
 
         <div class="px-2">
             <h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-[0.2em] mb-3">Pesanan Terkini</h3>
-            <div id="logArea" class="space-y-2 pb-10">
+            <div id="logArea" class="space-y-2">
                 <p class="text-center text-xs text-slate-300 italic py-4">Memuatkan log...</p>
             </div>
         </div>
@@ -103,13 +107,11 @@
 
         async function muatData() {
             try {
-                // 1. Muat Produk
                 const resP = await fetch(API + "?action=getProduk");
                 senaraiProduk = await resP.json();
                 document.getElementById('pilihBarang').innerHTML = '<option value="">-- SILA PILIH --</option>' + 
                     senaraiProduk.map(p => `<option value="${p.NamaBarang}">${p.NamaBarang.toUpperCase()} (Baki: ${p.Stok}kg)</option>`).join('');
 
-                // 2. Muat Log Pesanan
                 const resL = await fetch(API + "?action=getPesanan");
                 const logs = await resL.json();
                 const container = document.getElementById('logArea');
@@ -138,10 +140,19 @@
                 document.getElementById('viewHarga').innerText = itemSelected.Hargakg;
                 document.getElementById('viewLokasi').innerText = "📍 " + (itemSelected.Lokasi || "Kebun");
                 document.getElementById('beratKg').max = itemSelected.Stok;
+                
+                // Sembunyikan butang map jika tiada koordinat
+                document.getElementById('btnMap').style.display = (itemSelected.Coords) ? "flex" : "none";
             } else {
                 document.getElementById('cardProduk').classList.add('hidden');
             }
             kiraTotal();
+        }
+
+        function bukaMap() {
+            if(itemSelected && itemSelected.Coords) {
+                window.open(`https://www.google.com/maps/search/?api=1&query=${itemSelected.Coords}`, '_blank');
+            }
         }
 
         function kiraTotal() {
@@ -168,7 +179,7 @@
             const berat = document.getElementById('beratKg').value;
             const total = document.getElementById('totalHarga').innerText;
 
-            if(!nama || !wa || !barang || berat <= 0) return Swal.fire('Ops!', 'Sila lengkapkan maklumat pesanan.', 'warning');
+            if(!nama || !wa || !barang || berat <= 0) return Swal.fire('Ops!', 'Lengkapkan maklumat.', 'warning');
 
             Swal.fire({ title: 'Menghantar...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
@@ -179,7 +190,7 @@
                 });
                 const result = await res.json();
                 if(result.includes("Berjaya")) {
-                    Swal.fire('Berjaya!', 'Pesanan anda diterima & stok dikemaskini.', 'success').then(() => location.reload());
+                    Swal.fire('Berjaya!', 'Pesanan diterima.', 'success').then(() => location.reload());
                 } else {
                     Swal.fire('Gagal', result, 'error');
                 }
