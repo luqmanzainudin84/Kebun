@@ -20,6 +20,14 @@
         .cogs-label { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        
+        /* Button Styles */
+        .btn-action { padding: 8px; border-radius: 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .btn-pay { background: #10b981; color: white; }
+        .btn-collect { background: #f59e0b; color: white; }
+        .btn-wa { background: #25d366; color: white; }
+        .btn-call { background: #3b82f6; color: white; }
+        .status-done { opacity: 0.4; filter: grayscale(0.8); }
     </style>
 </head>
 <body class="pb-20">
@@ -41,7 +49,7 @@
         </section>
 
         <section>
-            <p class="text-[10px] font-bold text-orange-500 uppercase mb-4 tracking-widest text-center">Pengurusan Pesanan</p>
+            <p class="text-[10px] font-bold text-orange-500 uppercase mb-4 tracking-widest text-center tracking-[0.2em]">Pengurusan Pesanan</p>
             <div id="adminPesananContainer" class="space-y-4"></div>
         </section>
     </div>
@@ -50,14 +58,12 @@
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
         let leafMap, leafMarker;
 
-        // FUNGSI AUTO DECIMAL
         function formatInputDecimal(input) {
             let value = input.value.replace(/\D/g, "");
             if (value === "") { input.value = ""; return; }
             input.value = (parseFloat(value) / 100).toFixed(2);
         }
 
-        // FUNGSI MUAT DATA
         async function muatAdminData() {
             try {
                 const resP = await fetch(API + "?action=getProduk");
@@ -77,20 +83,53 @@
 
                 const resO = await fetch(API + "?action=getPesanan");
                 const pesanan = await resO.json();
-                document.getElementById('adminPesananContainer').innerHTML = pesanan.reverse().map(o => `
+                document.getElementById('adminPesananContainer').innerHTML = pesanan.reverse().map(o => {
+                    const isPaid = o.StatusBayar === "SETTLE";
+                    const isTaken = o.StatusAmbil === "SETTLE";
+                    
+                    return `
                     <div class="bg-white text-slate-800 p-6 rounded-[35px] shadow-2xl relative mb-4">
                         <button onclick="padamPesanan('${o.NamaPembeli}', '${o.NamaBarang}')" class="absolute top-4 right-4 text-red-400">
                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
+                        
                         <h3 class="font-black text-blue-600 uppercase text-lg leading-tight">${o.NamaPembeli}</h3>
                         <p class="text-[9px] text-slate-400 font-bold mb-3 italic">${o.Timestamp}</p>
-                        <div class="bg-green-50 p-3 rounded-2xl mb-2 text-center font-black text-green-700 uppercase border border-green-100">${o.NamaBarang} — ${o.Beratkg}KG</div>
-                        <div class="flex justify-between items-center text-xs font-bold text-slate-400 pt-2 border-t border-slate-50">TOTAL: <span class="text-2xl font-black text-slate-900">RM${o.TotalHarga}</span></div>
-                    </div>`).join('');
+                        
+                        <div class="bg-green-50 p-3 rounded-2xl mb-4 text-center font-black text-green-700 uppercase border border-green-100">
+                            ${o.NamaBarang} — ${o.Beratkg}KG
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <a href="tel:${o.NoWhatsapp}" class="btn-action btn-call">📞 Call</a>
+                            <a href="https://wa.me/${o.NoWhatsapp}" target="_blank" class="btn-action btn-wa">💬 WhatsApp</a>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <button onclick="updateStatus('${o.Timestamp}', 'StatusBayar')" class="btn-action btn-pay ${isPaid ? 'status-done' : ''}">
+                                ✅ ${isPaid ? 'SUDAH BAYAR' : 'BELUM BAYAR'}
+                            </button>
+                            <button onclick="updateStatus('${o.Timestamp}', 'StatusAmbil')" class="btn-action btn-collect ${isTaken ? 'status-done' : ''}">
+                                📦 ${isTaken ? 'SUDAH AMBIL' : 'BELUM AMBIL'}
+                            </button>
+                        </div>
+                        
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-400 pt-2 border-t border-slate-50">
+                            TOTAL: <span class="text-2xl font-black text-slate-900">RM${o.TotalHarga}</span>
+                        </div>
+                    </div>`;
+                }).join('');
             } catch (e) { console.log(e); }
         }
 
-        // FUNGSI COGS (MAINTAIN SETTING)
+        async function updateStatus(ts, field) {
+            Swal.fire({ title: 'Mengemaskini...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            await fetch(API, { method: 'POST', body: JSON.stringify({ action: 'updateStatusPesanan', timestamp: ts, field: field }) });
+            muatAdminData();
+            Swal.close();
+        }
+
+        // COGS, Tambah/Edit/Padam Produk logic remains the same
         async function bukaKiraCOGS() {
             const { value: formValues } = await Swal.fire({
                 title: 'KALKULATOR COGS',
@@ -136,16 +175,13 @@
             }
         }
 
-        // FUNGSI PRODUK (SELARAS DENGAN APPS SCRIPT BARU)
         async function bukaTambahProduk() { await popupBorangProduk('TAMBAH PRODUK BARU', '', '', '', '', '4.6619,101.0691', 'tambahProduk'); }
         async function bukaEditProduk(nama, harga, stok, lokasi, coords) { await popupBorangProduk('EDIT PRODUK', nama, harga, stok, lokasi, coords, 'kemaskiniProduk'); }
 
         async function popupBorangProduk(tajuk, nama, harga, stok, lokasi, coords, action) {
-            const isEdit = action === 'kemaskiniProduk';
             const { value: formValues } = await Swal.fire({
                 title: tajuk,
-                html: `
-                    <div class="text-left space-y-4 px-2">
+                html: `<div class="text-left space-y-4 px-2">
                         <div><label class="text-[10px] font-black text-green-400 uppercase">Nama Produk</label>
                         <input id="swal-nama" class="w-full p-4 mt-1 bg-slate-900 border border-slate-700 rounded-2xl text-white font-bold outline-none" value="${nama}"></div>
                         <div class="grid grid-cols-2 gap-3">
@@ -156,12 +192,10 @@
                         </div>
                         <div><label class="text-[10px] font-black text-green-400 uppercase">Lokasi</label>
                         <input id="swal-lokasi" class="w-full p-4 mt-1 bg-slate-900 border border-slate-700 rounded-2xl text-white font-bold outline-none" value="${lokasi}"></div>
-                        <div class="pt-2">
-                            <label class="text-[10px] font-black text-blue-400 uppercase">Pin Map</label>
-                            <div id="map-container"></div>
-                            <input id="swal-coords" class="w-full p-3 mt-2 bg-slate-900 text-[11px] text-green-500 font-mono rounded-xl border border-slate-700" value="${coords}" readonly>
-                            <button onclick="petaKeLokasiSaya()" type="button" class="w-full mt-2 bg-blue-600 p-4 rounded-2xl font-black text-xs uppercase shadow-lg">📍 Lokasi Saya</button>
-                        </div>
+                        <div class="pt-2"><label class="text-[10px] font-black text-blue-400 uppercase">Pin Map</label>
+                        <div id="map-container"></div>
+                        <input id="swal-coords" class="w-full p-3 mt-2 bg-slate-900 text-[11px] text-green-500 font-mono rounded-xl border border-slate-700" value="${coords}" readonly>
+                        <button onclick="petaKeLokasiSaya()" type="button" class="w-full mt-2 bg-blue-600 p-4 rounded-2xl font-black text-xs uppercase shadow-lg">📍 Lokasi Saya</button></div>
                     </div>`,
                 didOpen: () => { setTimeout(() => { initLeaflet(coords); }, 300); },
                 showCancelButton: true,
