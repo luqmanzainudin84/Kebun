@@ -16,7 +16,28 @@
         .admin-card { background: #1e293b; border-radius: 30px; border: 1px solid #334155; }
         #map-container { height: 250px; width: 100%; border-radius: 20px; margin-top: 10px; z-index: 10; border: 2px solid #334155; }
         .swal2-popup { border-radius: 35px !important; background: #1e293b !important; color: white !important; width: 95% !important; max-width: 500px !important; }
-        .cogs-input { background: #0f172a !important; border: 1px solid #334155 !important; color: #10b981 !important; font-weight: bold; padding: 10px; border-radius: 10px; width: 100%; outline: none; text-align: right; font-size: 14px; }
+        
+        /* FIX: Buang butang atas bawah (spinner) dan adjust padding */
+        .cogs-input { 
+            background: #0f172a !important; 
+            border: 1px solid #334155 !important; 
+            color: #10b981 !important; 
+            font-weight: bold; 
+            padding: 10px 15px; 
+            border-radius: 10px; 
+            width: 100%; 
+            outline: none; 
+            text-align: right; 
+            font-size: 14px; 
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+        .cogs-input::-webkit-outer-spin-button,
+        .cogs-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
         .cogs-label { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
         .btn-action { padding: 12px; border-radius: 15px; font-size: 11px; font-weight: 800; text-transform: uppercase; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-pay { background: #10b981; color: white; }
@@ -58,10 +79,15 @@
         const API = "https://script.google.com/macros/s/AKfycbygJNpuDcoItHJ8RnWKIzqoQBJ9LX3ybjp4YmGKVVgvVEUZmo_FCuu2WpL7KsZJujxh_g/exec";
         let leafMap, leafMarker;
 
-        function formatInputDecimal(input) {
-            let value = input.value.replace(/\D/g, "");
-            if (value === "") { input.value = ""; return; }
-            input.value = (parseFloat(value) / 100).toFixed(2);
+        // FIX: Fungsi input supaya tidak auto 0.01 dan kosongkan box bila fokus
+        function setupCogsInput(id) {
+            const el = document.getElementById(id);
+            el.addEventListener('focus', function() {
+                if (this.value === "0.00" || this.value === "0") this.value = "";
+            });
+            el.addEventListener('blur', function() {
+                if (this.value === "") this.value = "0.00";
+            });
         }
 
         async function bukaKiraCOGS() {
@@ -72,36 +98,37 @@
                     
                     <div class="section-title text-blue-400">A. Maklumat Hasil</div>
                     <label class="cogs-label">Jumlah Hasil Musim (kg)</label>
-                    <input id="hasil_kg" type="number" class="cogs-input" placeholder="Contoh: 1000">
-                    <p class="text-[9px] text-slate-500 mt-1">*Atau (Bil. Pokok x Purata Hasil Sepokok)</p>
+                    <input id="hasil_kg" type="number" class="cogs-input" placeholder="0">
 
                     <div class="section-title text-green-400">B. Kos 1 Musim (Kos Habis Pakai)</div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div><label class="cogs-label">Benih</label><input id="k_benih" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                        <div><label class="cogs-label">Media/Polybag</label><input id="k_media" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                        <div><label class="cogs-label">Baja A & B</label><input id="k_baja" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                        <div><label class="cogs-label">Baja Foliar</label><input id="k_foliar" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                        <div><label class="cogs-label">Racun</label><input id="k_racun" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                        <div><label class="cogs-label">Upah Buruh</label><input id="k_buruh" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                        <div><label class="cogs-label">Air & Elektrik</label><input id="k_utiliti" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
-                        <div><label class="cogs-label">Lain-lain</label><input id="k_lain" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)"></div>
+                        <div><label class="cogs-label">Benih</label><input id="k_benih" type="number" step="0.01" class="cogs-input" value="0.00"></div>
+                        <div><label class="cogs-label">Media/Polybag</label><input id="k_media" type="number" step="0.01" class="cogs-input" value="0.00"></div>
+                        <div><label class="cogs-label">Baja A & B</label><input id="k_baja" type="number" step="0.01" class="cogs-input" value="0.00"></div>
+                        <div><label class="cogs-label">Baja Foliar</label><input id="k_foliar" type="number" step="0.01" class="cogs-input" value="0.00"></div>
+                        <div><label class="cogs-label">Racun</label><input id="k_racun" type="number" step="0.01" class="cogs-input" value="0.00"></div>
+                        <div><label class="cogs-label">Upah Buruh</label><input id="k_buruh" type="number" step="0.01" class="cogs-input" value="0.00"></div>
+                        <div><label class="cogs-label">Air & Elektrik</label><input id="k_utiliti" type="number" step="0.01" class="cogs-input" value="0.00"></div>
+                        <div><label class="cogs-label">Lain-lain</label><input id="k_lain" type="number" step="0.01" class="cogs-input" value="0.00"></div>
                     </div>
 
                     <div class="section-title text-orange-400">C. Kos Sistem (Aset + Susut Nilai)</div>
                     <label class="cogs-label">Jumlah Kos Sistem (RM)</label>
-                    <input id="aset_kos" type="text" class="cogs-input" value="0.00" oninput="formatInputDecimal(this)">
+                    <input id="aset_kos" type="number" step="0.01" class="cogs-input" value="0.00">
                     <div class="grid grid-cols-2 gap-2 mt-2">
                         <div><label class="cogs-label">Tempoh Guna (Tahun)</label><input id="aset_tahun" type="number" class="cogs-input" value="5"></div>
                         <div><label class="cogs-label">Musim Setahun</label><input id="aset_musim_setahun" type="number" class="cogs-input" value="2"></div>
                     </div>
                 </div>`,
+                didOpen: () => {
+                    // Apply reset logic to all inputs
+                    ['k_benih','k_media','k_baja','k_foliar','k_racun','k_buruh','k_utiliti','k_lain','aset_kos','hasil_kg','aset_tahun','aset_musim_setahun'].forEach(setupCogsInput);
+                },
                 confirmButtonText: 'KIRA SEKARANG',
                 confirmButtonColor: '#2563eb',
                 showCancelButton: true,
                 preConfirm: () => {
                     const hasilKg = parseFloat(document.getElementById('hasil_kg').value) || 1;
-                    
-                    // Kos Habis Pakai
                     const kosHabisPakai = 
                         (parseFloat(document.getElementById('k_benih').value) || 0) + 
                         (parseFloat(document.getElementById('k_media').value) || 0) + 
@@ -112,24 +139,16 @@
                         (parseFloat(document.getElementById('k_utiliti').value) || 0) + 
                         (parseFloat(document.getElementById('k_lain').value) || 0);
 
-                    // Susut Nilai
                     const kosSistem = parseFloat(document.getElementById('aset_kos').value) || 0;
                     const tahunGuna = parseFloat(document.getElementById('aset_tahun').value) || 1;
                     const musimSetahun = parseFloat(document.getElementById('aset_musim_setahun').value) || 1;
                     
                     const jumlahMusimSistem = tahunGuna * musimSetahun;
                     const susutNilaiPerMusim = kosSistem / jumlahMusimSistem;
-
-                    // Jumlah COGS
                     const jumlahCOGS = kosHabisPakai + susutNilaiPerMusim;
                     const kosPerKg = jumlahCOGS / hasilKg;
 
-                    return { 
-                        totalCOGS: jumlahCOGS, 
-                        perKg: kosPerKg, 
-                        susutNilai: susutNilaiPerMusim, 
-                        kosHabisPakai: kosHabisPakai 
-                    };
+                    return { totalCOGS: jumlahCOGS, perKg: kosPerKg, susutNilai: susutNilaiPerMusim, kosHabisPakai: kosHabisPakai };
                 }
             });
 
